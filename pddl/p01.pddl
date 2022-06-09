@@ -1,20 +1,13 @@
 (define (problem grid3by3) (:domain grid)
 (:objects 
-    x1
-    x2
-    x3
-    y1
-    y2
-    y3
-    droplet1
-    droplet2
+    droplet1 droplet2 - droplet
 )
 
 (:init
-    (droplet-at droplet1 x1 y1)
-    (droplet-at droplet2 x3 y3)
-    (occupied x1 y1)
-    (occupied x3 y3)
+    (droplet-at droplet1 x2 y2)
+    (droplet-at droplet2 x4 y4)
+    (occupied x2 y2)
+    (occupied x4 y4)
 
     (NEIGHBOUR x1 y1 x1 y2)
     (NEIGHBOUR x1 y1 x2 y1)
@@ -84,7 +77,7 @@
 )
 
 (:goal (and
-    (droplet-at droplet1 x3 y3)
-    (droplet-at droplet2 x1 y1)
+    (droplet-at droplet1 x2 y3)
+    (droplet-at droplet2 x4 y4)
 ))
 )
