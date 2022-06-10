@@ -102,8 +102,8 @@
     :effect (and 
         (at start (not (droplet-at ?d x2 y2)))
         (at end (droplet-at ?d x2 y3))
-        (at start (not (occupied x2 y2)))
-        (at end (occupied x2 y3))
+        (at end (not (occupied x2 y2)))
+        (at start (occupied x2 y3))
     )
 )
 
