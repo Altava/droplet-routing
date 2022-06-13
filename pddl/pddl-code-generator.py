@@ -33,13 +33,13 @@ def print_vicinity(x, y):
                     print("(VICINITY x%i y%i x%i y%i)" % (ix, iy, ix - 1, iy + 1))
 
 def print_domain(x, y, duration=1):
-    domainfile = "grid_%ix%i.pddl" % (x, y)
+    domainfile = "domain_%ix%i.pddl" % (x, y)
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, domainfile)
     if os.path.exists(filename):
         os.remove(filename)
     f = open(filename, "x")
-    f.write("(define (domain grid_%ix%i)\n" % (x, y))
+    f.write("(define (domain domain_%ix%i)\n" % (x, y))
     f.write("\n(:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions :durative-actions)\n\n")
     f.write("(:types\n    droplet coordinate - object\n    xcoord ycoord - coordinate\n    ")
     for i in range(1, x+1):
@@ -54,7 +54,7 @@ def print_domain(x, y, duration=1):
         for j in range(1, y+1):
             # move east
             if i < x:                       # then the move is possible
-                f.write("\n(:durative-action move_%i%i_%i%i\n" % (i, j, i+1, j))
+                f.write("\n(:durative-action move_%i-%i_%i-%i\n" % (i, j, i+1, j))
                 f.write("    :parameters (?d - droplet)\n")
                 f.write("    :duration (= ?duration %i)\n" % duration)
                 f.write("    :condition (and\n")
@@ -74,7 +74,7 @@ def print_domain(x, y, duration=1):
 
             # move south
             if j > 1:                       # then the move is possible
-                f.write("\n(:durative-action move_%i%i_%i%i\n" % (i, j, i, j-1))
+                f.write("\n(:durative-action move_%i-%i_%i-%i\n" % (i, j, i, j-1))
                 f.write("  :parameters (?d - droplet)\n")
                 f.write("  :duration (= ?duration %i)\n" % duration)
                 f.write("  :condition (and\n")
@@ -94,7 +94,7 @@ def print_domain(x, y, duration=1):
 
             # move west
             if i > 1:                       # then the move is possible
-                f.write("\n(:durative-action move_%i%i_%i%i\n" % (i, j, i-1, j))
+                f.write("\n(:durative-action move_%i-%i_%i-%i\n" % (i, j, i-1, j))
                 f.write("  :parameters (?d - droplet)\n")
                 f.write("  :duration (= ?duration %i)\n" % duration)
                 f.write("  :condition (and\n")
@@ -114,7 +114,7 @@ def print_domain(x, y, duration=1):
 
             # move north
             if j < y:                       # then the move is possible
-                f.write("\n(:durative-action move_%i%i_%i%i\n" % (i, j, i, j+1))
+                f.write("\n(:durative-action move_%i-%i_%i-%i\n" % (i, j, i, j+1))
                 f.write("  :parameters (?d - droplet)\n")
                 f.write("  :duration (= ?duration %i)\n" % duration)
                 f.write("  :condition (and\n")
@@ -137,13 +137,13 @@ def print_domain(x, y, duration=1):
     f.close()
 
 def print_problem(x, y, droplets, goals):
-    domainfile = "grid%iby%i.pddl" % (x, y)
+    problemfile = "p_%ix%i.pddl" % (x, y)
     dirname = os.path.dirname(__file__)
-    filename = os.path.join(dirname, domainfile)
+    filename = os.path.join(dirname, problemfile)
     if os.path.exists(filename):
         os.remove(filename)
     f = open(filename, "x")
-    f.write("(define (problem grid%iby%i) (:domain grid_%ix%i)\n\n" % (x, y, x, y))
+    f.write("(define (problem p_%ix%i) (:domain domain_%ix%i)\n\n" % (x, y, x, y))
     f.write("(:objects\n    ")
     for d in range(1, len(droplets)+1):
         f.write("droplet%i " % (d))
@@ -168,12 +168,22 @@ def print_problem(x, y, droplets, goals):
     f.close()
 
 if __name__ == '__main__':
-    x = 3
-    y = 3
+    set1 = (3, 3, ("x1 y1", "x3 y3"), ("x3 y3", "x1 y1"))
+    set2 = (4, 4, ("x1 y1", "x4 y4", "x1 y4"), ("x4 y4", "x1 y1", "x4 y1"))
+    
+    x = 5
+    y = 4
     d1_start = "x1 y1"
-    d2_start = "x3 y3"
+    d2_start = "x4 y4"
+    d3_start = "x1 y4"
+    d4_start = "x3 y2"
     d1_goal = "x3 y3"
     d2_goal = "x1 y1"
-    print_domain(x, y)
-    print_problem(x, y, (d1_start, d2_start), (d1_goal, d2_goal))
+    d3_goal = "x4 y1"
+    d4_goal = "x1 y4"
+    set3 = (x, y, (d1_start, d2_start, d3_start, d4_start), (d1_goal, d2_goal, d3_goal, d4_goal))
+
+    currentSet = set1
+    print_domain(currentSet[0], currentSet[1])
+    print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3])
 
