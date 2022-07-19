@@ -57,16 +57,29 @@ def show_plan(filename, blockfilename=None):
 
     moves = []
     i = 0
+    time = 0
 
     # parse plan into time, coordinates and droplet numbers
     for l in lis:
-        time, move, droplet, cost = l.split()
-        time = time[0:5]
+        elem = l.split()
+        if elem[0] == ";":
+            break
+        if len(elem) == 4:
+            time = elem[0]
+            move = elem[1]
+            droplet = elem[2]
+            time = time[0:5]
+        else:
+            move = elem[0]
+            droplet = elem[1]
+        
         m, origin, target = move.split("_")
         dropletnumber = [int(s) for s in droplet if s.isdigit()][0]
         originx, originy = origin.split("-")
         targetx, targety = target.split("-")
         moves.append((int(originx), int(originy), int(targetx), int(targety), int(dropletnumber), float(time)))
+        if len(elem) != 4:
+            time += 1
 
     moves.sort(key=takeTime)
     # print(moves)
