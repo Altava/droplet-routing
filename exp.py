@@ -21,7 +21,5 @@ rev = "main"
 
 exp.add_algorithm("lmcut", repo, rev, ["--search", "astar(lmcut())"])
 
-dir = "~/droplet-routing/pddl/"
-exp.add_suite(benchmarks_dir, ["depot", "gripper"])
-exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
-exp.add_suite(benchmarks_dir, ["rubiks-cube:p01.sas"])
+benchmarks_dir = "/infai/burfab04/droplet-routing/benchmarks/"
+exp.add_suite(benchmarks_dir, ["classical_pregrounded"])
