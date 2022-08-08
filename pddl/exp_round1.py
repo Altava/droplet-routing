@@ -1,6 +1,10 @@
-import glob
+# import glob
 import os
 import platform
+
+from more_itertools import partition
+
+import project
 
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
@@ -23,8 +27,8 @@ class BaseReport(AbsoluteReport):
 
 NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
-SCRIPT_DIR = os.environ("ROUTING_BENCHMARKS")
-BENCHMARKS_DIR = os.environ("DOWNWARD_REPO")
+SCRIPT_DIR = os.environ["ROUTING_BENCHMARKS"]
+BENCHMARKS_DIR = os.environ["DOWNWARD_REPO"]
 # BHOSLIB_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "bhoslib", "*.mis")))
 # RANDOM_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "random", "*.txt")))
 ALGORITHMS = ["2approx", "greedy"]
@@ -33,7 +37,12 @@ TIME_LIMIT = 18000
 MEMORY_LIMIT = 2048
 
 if REMOTE:
-    ENV = BaselSlurmEnvironment(email="f.burch@unibas.ch")
+    ENV = BaselSlurmEnvironment(
+        email="f.burch@unibas.ch",
+        partition="infai_1",
+        memory_per_cpu="3790M",
+        cpus_per_task=4,
+        )
     SUITE = ["classical_grounded_coords:p3x3.pddl", "classical_lifted_coords:p3x3.pddl"]
 else:
     ENV = LocalEnvironment(processes=2)
