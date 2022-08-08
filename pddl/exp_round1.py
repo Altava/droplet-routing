@@ -2,8 +2,6 @@
 import os
 import platform
 
-from more_itertools import partition
-
 import project
 
 from downward.reports.absolute import AbsoluteReport
@@ -27,8 +25,8 @@ class BaseReport(AbsoluteReport):
 
 NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
-SCRIPT_DIR = os.environ["ROUTING_BENCHMARKS"]
-BENCHMARKS_DIR = os.environ["DOWNWARD_REPO"]
+SCRIPT_DIR = os.environ["DOWNWARD_REPO"]
+BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 # BHOSLIB_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "bhoslib", "*.mis")))
 # RANDOM_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "random", "*.txt")))
 ALGORITHMS = ["2approx", "greedy"]
@@ -61,7 +59,7 @@ ATTRIBUTES = [
 # Create a new experiment.
 exp = Experiment(environment=ENV)
 # Add solver to experiment and make it available to all runs.
-exp.add_resource("solver", os.path.join(SCRIPT_DIR, "solver.py"))
+exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
 exp.add_parser("parser.py")
 
