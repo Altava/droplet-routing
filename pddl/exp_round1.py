@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # import glob
 import os
 import platform
@@ -78,17 +79,17 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     )
     # AbsoluteReport needs the following attributes:
     # 'domain', 'problem' and 'algorithm'.
-    domain = os.path.basename(os.path.dirname(task))
-    task_name = os.path.basename(task)
-    run.set_property("domain", domain)
-    run.set_property("problem", task_name)
+    # domain = os.path.basename(os.path.dirname(task))
+    # task_name = os.path.basename(task)
+    run.set_property("domain", task.domain)
+    run.set_property("problem", task.problem)
     run.set_property("algorithm", "lama-first")
     # BaseReport needs the following properties:
     # 'time_limit', 'memory_limit', 'seed'.
     run.set_property("time_limit", TIME_LIMIT)
     run.set_property("memory_limit", MEMORY_LIMIT)
     # Every run has to have a unique id in the form of a list.
-    run.set_property("id", ["lama-first", domain, task_name])
+    run.set_property("id", ["lama-first", task.domain, task.problem])
 
 # Add step that writes experiment files to disk.
 exp.add_step("build", exp.build)
