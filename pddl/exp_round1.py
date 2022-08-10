@@ -3,6 +3,7 @@ import os
 import platform
 
 from downward.reports.absolute import AbsoluteReport
+from downward.suites import build_suite
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
 from lab.reports import Attribute
@@ -27,9 +28,9 @@ SCRIPT_DIR = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 # BHOSLIB_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "bhoslib", "*.mis")))
 # RANDOM_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "random", "*.txt")))
-ALGORITHMS = ["2approx", "greedy"]
+# ALGORITHMS = ["2approx", "greedy"]
 SEED = 2018
-TIME_LIMIT = 18000
+TIME_LIMIT = 1800
 MEMORY_LIMIT = 2048
 
 if REMOTE:
@@ -63,32 +64,31 @@ exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
 exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
 
-for algo in ALGORITHMS:
-    for task in SUITE:
-        run = exp.add_run()
-        # Create a symbolic link and an alias. This is optional. We
-        # could also use absolute paths in add_command().
-        run.add_resource("task", task, symlink=True)
-        run.add_command(
-            "solve",
-            ["{solver}", "--seed", str(SEED), "{task}", algo],
-            time_limit=TIME_LIMIT,
-            memory_limit=MEMORY_LIMIT,
-        )
-        # AbsoluteReport needs the following attributes:
-        # 'domain', 'problem' and 'algorithm'.
-        domain = os.path.basename(os.path.dirname(task))
-        task_name = os.path.basename(task)
-        run.set_property("domain", domain)
-        run.set_property("problem", task_name)
-        run.set_property("algorithm", algo)
-        # BaseReport needs the following properties:
-        # 'time_limit', 'memory_limit', 'seed'.
-        run.set_property("time_limit", TIME_LIMIT)
-        run.set_property("memory_limit", MEMORY_LIMIT)
-        run.set_property("seed", SEED)
-        # Every run has to have a unique id in the form of a list.
-        run.set_property("id", [algo, domain, task_name])
+for task in build_suite(BENCHMARKS_DIR, SUITE):
+    run = exp.add_run()
+    # Create a symbolic link and an alias. This is optional. We
+    # could also use absolute paths in add_command().
+    run.add_resource("domain", task.domain_file, symlink=True)
+    run.add_resource("problem", task.problem_file, symlink=True)
+    run.add_command(
+        "solve",
+        ["{solver}",  "--alias", "lama-first", "{domain}", "{problem}"],
+        time_limit=TIME_LIMIT,
+        memory_limit=MEMORY_LIMIT,
+    )
+    # AbsoluteReport needs the following attributes:
+    # 'domain', 'problem' and 'algorithm'.
+    domain = os.path.basename(os.path.dirname(task))
+    task_name = os.path.basename(task)
+    run.set_property("domain", domain)
+    run.set_property("problem", task_name)
+    run.set_property("algorithm", "lama-first")
+    # BaseReport needs the following properties:
+    # 'time_limit', 'memory_limit', 'seed'.
+    run.set_property("time_limit", TIME_LIMIT)
+    run.set_property("memory_limit", MEMORY_LIMIT)
+    # Every run has to have a unique id in the form of a list.
+    run.set_property("id", ["lama-first", domain, task_name])
 
 # Add step that writes experiment files to disk.
 exp.add_step("build", exp.build)
