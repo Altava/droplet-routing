@@ -60,9 +60,9 @@ ATTRIBUTES = [
 # Create a new experiment.
 exp = Experiment(environment=ENV)
 # Add solver to experiment and make it available to all runs.
-exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
+# exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
-exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
+# exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
 
 for task in build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
@@ -72,7 +72,7 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     run.add_resource("problem", task.problem_file, symlink=True)
     run.add_command(
         "solve",
-        ["{solver}",  "--alias", "lama-first", "{domain}", "{problem}"],
+        ["fast-downward.py", "--alias", "lama-first", "{domain}", "{problem}"],
         time_limit=TIME_LIMIT,
         memory_limit=MEMORY_LIMIT,
     )
