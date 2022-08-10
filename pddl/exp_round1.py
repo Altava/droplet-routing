@@ -2,8 +2,6 @@
 import os
 import platform
 
-import project
-
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
@@ -47,12 +45,14 @@ else:
     # Use smaller suite for local tests.
     # SUITE = BHOSLIB_GRAPHS[:1] + RANDOM_GRAPHS[:1]
 ATTRIBUTES = [
-    "cover",
-    "cover_size",
+    # "cover",
+    # "cover_size",
     "error",
-    "solve_time",
+    "run_dir",
+    "total_time",
     "solver_exit_code",
     "expansions",
+    "memory",
     Attribute("solved", absolute=True),
 ]
 
@@ -61,7 +61,7 @@ exp = Experiment(environment=ENV)
 # Add solver to experiment and make it available to all runs.
 exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
-exp.add_parser("parser.py")
+exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
 
 for algo in ALGORITHMS:
     for task in SUITE:
