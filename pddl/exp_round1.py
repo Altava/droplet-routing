@@ -3,6 +3,7 @@
 import os
 import platform
 
+from pathlib import Path
 from downward.reports.absolute import AbsoluteReport
 from downward.suites import build_suite
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
@@ -33,6 +34,7 @@ BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 SEED = 2018
 TIME_LIMIT = 1800
 MEMORY_LIMIT = 2048
+DIR = Path(__file__).resolve().parent
 
 if REMOTE:
     ENV = BaselSlurmEnvironment(
@@ -41,7 +43,7 @@ if REMOTE:
         memory_per_cpu="3790M",
         cpus_per_task=4,
         )
-    SUITE = ["classical_grounded_coords:p3x3.pddl", "classical_lifted_coords:p3x3.pddl"]
+    SUITE = ["classical_grounded_coords", "classical_lifted_coords"]
 else:
     ENV = LocalEnvironment(processes=2)
     # Use smaller suite for local tests.
@@ -64,6 +66,7 @@ exp = Experiment(environment=ENV)
 # exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
 # exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
+exp.add_parser(DIR / "parser.py")
 
 for task in build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
