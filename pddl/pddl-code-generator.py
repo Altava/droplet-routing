@@ -6,6 +6,7 @@ import weakref
 durative = False
 preGrounding = False
 coordinates = False
+all = False
 
 def validate_file(f):
     if not os.path.exists(f):
@@ -129,7 +130,7 @@ def print_vicinity(x, y, f):
                     if iy < y:
                         f.write("    (VICINITY c%i c%i)\n" % (ix + (iy - 1) * x, ix - 1 + iy * x))
 
-def print_domain(x, y, blockages, duration=1):
+def print_domain(x, y, droplets, blockages, duration=1):
     global durative
     global preGrounding
     global coordinates
@@ -172,7 +173,7 @@ def print_domain(x, y, blockages, duration=1):
         targetTypeWithType = "?ct - coordinate"
         equalityType = "(= ?c ?co)"
 
-    domainfile = "p%ix%i-domain.pddl" % (x, y)
+    domainfile = "p%ix%id%i-domain.pddl" % (x, y, len(droplets))
     parentname = os.path.dirname(__file__)
     dirname = os.path.join(parentname, "benchmarks", f1 + f2 + f3)
 
@@ -188,7 +189,7 @@ def print_domain(x, y, blockages, duration=1):
     
     # Open the file and start writing.
     f = open(filename, "x")
-    f.write("(define (domain p%ix%i-domain)\n" % (x, y))
+    f.write("(define (domain p%ix%id%i-domain)\n" % (x, y, len(droplets)))
     f.write("\n(:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions")
 
     # required for durative version
@@ -437,7 +438,7 @@ def print_problem(x, y, droplets, goals, blockages):
         f3 = "sequential"
 
     # Name the problem file.
-    problemfile = "p%ix%i.pddl" % (x, y)
+    problemfile = "p%ix%id%i.pddl" % (x, y, len(droplets))
     parentname = os.path.dirname(__file__)
     dirname = os.path.join(parentname, "benchmarks", f1 + f2 + f3)
 
@@ -453,7 +454,7 @@ def print_problem(x, y, droplets, goals, blockages):
     
     # Open the file and start writing.
     f = open(filename, "x")
-    f.write("(define (problem p%ix%i) (:domain p%ix%i-domain)\n\n" % (x, y, x, y))
+    f.write("(define (problem p%ix%id%i) (:domain p%ix%id%i-domain)\n\n" % (x, y, len(droplets), x, y, len(droplets)))
 
     # List all objects - in the problem file we only need the droplets.
     f.write("(:objects\n    ")
@@ -522,6 +523,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", "-durative", dest='durative', action='store_true', default=False, help='Add if you want the domain to be durative.')
     parser.add_argument("-g", "-grounding", dest='grounding', action='store_true', default=False, help='Add if you want the domain to be pre-grounded. This will eliminate forall statements.')
     parser.add_argument("-c", "-coordinates", dest='coordinates', action='store_true', default=False, help='Add if you want to use x- and y-coordinates. Else fields will be simply enumerated.')
+    parser.add_argument("-a", "-all", dest='all', action='store_true', default=False, help='Add if you want to generate all versions: (durative / classical) (grounded / lifted) (coords / sequential).')
     args = parser.parse_args()
 
     if args.durative:
@@ -532,6 +534,9 @@ if __name__ == '__main__':
 
     if args.coordinates:
         coordinates = True
+
+    if args.all:
+        all = True
     
     if args.path:
         x, y, start, goal, block = parseFile(args.path[0])
@@ -554,6 +559,15 @@ if __name__ == '__main__':
 
         currentSet = set1
 
-    print_domain(currentSet[0], currentSet[1], currentSet[4])
-    print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
-    print("Domain and problem files generated.")
+    if all:
+        for durative in [True, False]:
+            for preGrounding in [True, False]:
+                for coordinates in [True, False]:
+                    print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4])
+                    print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
+        print("Domain and problem files generated.")
+        
+    else:
+        print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4])
+        print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
+        print("Domain and problem files generated.")
