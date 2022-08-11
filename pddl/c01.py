@@ -43,7 +43,7 @@ if REMOTE:
         memory_per_cpu="3790M",
         cpus_per_task=4,
         )
-    SUITE = ["classical_grounded_coords", "classical_lifted_coords"]
+    SUITE = ["classical_grounded_coords", "classical_lifted_coords", "classical_grounded_sequential", "classical_lifted_sequential"]
 else:
     ENV = LocalEnvironment(processes=2)
     # Use smaller suite for local tests.
