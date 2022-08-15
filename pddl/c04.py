@@ -83,7 +83,7 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     run.add_resource("problem", task.problem_file, symlink=True)
     run.add_command(
         "solve",
-        ["fast-downward.py", "--alias", CONFIGURATION, "{domain}", "{problem}"],
+        ["fast-downward.py", "--alias", CONFIGURATION, "--overall-time-limit", "30m", "{domain}", "{problem}"],
         time_limit=TIME_LIMIT,
         memory_limit=MEMORY_LIMIT,
     )
