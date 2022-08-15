@@ -76,7 +76,7 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     run.add_resource("problem", task.problem_file, symlink=True)
     run.add_command(
         "solve",
-        ["plan.sh", "{domain}", "{problem}", "solution.out"],
+        ["plan", "{domain}", "{problem}", "solution.out"],
         time_limit=TIME_LIMIT,
         memory_limit=MEMORY_LIMIT,
     )
