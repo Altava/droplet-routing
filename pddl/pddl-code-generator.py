@@ -584,6 +584,7 @@ if __name__ == '__main__':
         print("Domain and problem files generated.")
         
     else:
-        print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4])
-        print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
-        print("Domain and problem files generated.")
+        if not args.dir:
+            print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4])
+            print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
+            print("Domain and problem files generated.")
