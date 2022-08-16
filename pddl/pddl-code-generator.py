@@ -1,6 +1,7 @@
 import os
 import argparse
 import re
+from turtle import st
 
 durative = False
 preGrounding = False
@@ -129,7 +130,7 @@ def print_vicinity(x, y, f):
                     if iy < y:
                         f.write("    (VICINITY c%i c%i)\n" % (ix + (iy - 1) * x, ix - 1 + iy * x))
 
-def print_domain(x, y, droplets, blockages, duration=1):
+def print_domain(x, y, droplets, blockages, n, duration=1):
     global durative
     global preGrounding
     global coordinates
@@ -172,7 +173,7 @@ def print_domain(x, y, droplets, blockages, duration=1):
         targetTypeWithType = "?ct - coordinate"
         equalityType = "(= ?c ?co)"
 
-    domainfile = "p%ix%id%i-domain.pddl" % (x, y, len(droplets))
+    domainfile = "p%ix%id%in" % (x, y, len(droplets)) + n + "-domain.pddl"
     parentname = os.path.dirname(__file__)
     dirname = os.path.join(parentname, "benchmarks", f1 + f2 + f3)
 
@@ -188,7 +189,7 @@ def print_domain(x, y, droplets, blockages, duration=1):
     
     # Open the file and start writing.
     f = open(filename, "x")
-    f.write("(define (domain p%ix%id%i-domain)\n" % (x, y, len(droplets)))
+    f.write("(define (domain p%ix%id%in" % (x, y, len(droplets)) + n + "-domain)\n")
     f.write("\n(:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions")
 
     # required for durative version
@@ -416,7 +417,7 @@ def print_domain(x, y, droplets, blockages, duration=1):
 
     f.close()
 
-def print_problem(x, y, droplets, goals, blockages):
+def print_problem(x, y, droplets, goals, blockages, n):
     global durative
     global preGrounding
     global coordinates
@@ -437,7 +438,7 @@ def print_problem(x, y, droplets, goals, blockages):
         f3 = "sequential"
 
     # Name the problem file.
-    problemfile = "p%ix%id%i.pddl" % (x, y, len(droplets))
+    problemfile = "p%ix%id%in" % (x, y, len(droplets)) + n + ".pddl"
     parentname = os.path.dirname(__file__)
     dirname = os.path.join(parentname, "benchmarks", f1 + f2 + f3)
 
@@ -453,7 +454,7 @@ def print_problem(x, y, droplets, goals, blockages):
     
     # Open the file and start writing.
     f = open(filename, "x")
-    f.write("(define (problem p%ix%id%i) (:domain p%ix%id%i-domain)\n\n" % (x, y, len(droplets), x, y, len(droplets)))
+    f.write("(define (problem p%ix%id%in" % (x, y, len(droplets)) + n + ") (:domain p%ix%id%in" % (x, y, len(droplets)) + n + "-domain)\n\n")
 
     # List all objects - in the problem file we only need the droplets.
     f.write("(:objects\n    ")
@@ -519,6 +520,7 @@ def add_droplet(i, j, coords):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Usage:\nAdd -b to provide a .bio file to generate domain and problem from. If none is provided, a simple 3 by 3 problem will be generated.\nUse -d, -g, -c, -a to refine which version you want to generate.")
     parser.add_argument("-b", "-bio", dest='path', type=validate_file, nargs=1, help='Provide the path to the .bio file to be loaded as configuration.', metavar="FILE")
+    parser.add_argument("-dir", "-directory", dest='dir', type=validate_file, nargs=1, help='Provide the path to the directory containing the .bio files to be loaded as configuration. Will automatically generate all versions (similar to -all).')
     parser.add_argument("-d", "-durative", dest='durative', action='store_true', default=False, help='Add if you want the domain to be durative.')
     parser.add_argument("-g", "-grounding", dest='grounding', action='store_true', default=False, help='Add if you want the domain to be pre-grounded. This will eliminate forall statements.')
     parser.add_argument("-c", "-coordinates", dest='coordinates', action='store_true', default=False, help='Add if you want to use x- and y-coordinates. Else fields will be simply enumerated.')
@@ -540,6 +542,22 @@ if __name__ == '__main__':
     if args.path:
         x, y, start, goal, block = parseFile(args.path[0])
         currentSet = (x, y, start, goal, block)
+
+    elif args.dir:
+        dir = args.dir[0]
+        print("dir: ")
+        print(os.listdir(dir))
+        for fl in os.listdir(dir):
+            print("Current file: " + fl)
+            x, y, start, goal, block = parseFile(os.path.join(dir, fl))
+            n, ext = os.path.splitext(fl)
+            currentSet = (x, y, start, goal, block)
+            for durative in [True, False]:
+                for preGrounding in [True, False]:
+                    for coordinates in [True, False]:
+                        print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4], n)
+                        print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4], n)
+
     else:
         set1 = (3, 3, ("x1 y1", "x3 y3"), ("x3 y3", "x1 y1"), ())
         set2 = (4, 4, ("x1 y1", "x4 y4", "x1 y4"), ("x4 y4", "x1 y1", "x4 y1"), ())
