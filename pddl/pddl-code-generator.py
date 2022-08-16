@@ -1,7 +1,6 @@
 import os
 import argparse
 import re
-from turtle import st
 
 durative = False
 preGrounding = False
