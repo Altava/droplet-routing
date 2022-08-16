@@ -1,7 +1,6 @@
 import os
 import argparse
 import re
-import weakref
 
 durative = False
 preGrounding = False
@@ -518,7 +517,7 @@ def add_droplet(i, j, coords):
     coords.append("%i%i" % (i, j))
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Provide .bio file path.")
+    parser = argparse.ArgumentParser(description="Usage:\nAdd -b to provide a .bio file to generate domain and problem from. If none is provided, a simple 3 by 3 problem will be generated.\nUse -d, -g, -c, -a to refine which version you want to generate.")
     parser.add_argument("-b", "-bio", dest='path', type=validate_file, nargs=1, help='Provide the path to the .bio file to be loaded as configuration.', metavar="FILE")
     parser.add_argument("-d", "-durative", dest='durative', action='store_true', default=False, help='Add if you want the domain to be durative.')
     parser.add_argument("-g", "-grounding", dest='grounding', action='store_true', default=False, help='Add if you want the domain to be pre-grounded. This will eliminate forall statements.')
