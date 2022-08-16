@@ -34,7 +34,7 @@ BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 SEED = 2018
 TIME_LIMIT = 1800
 MEMORY_LIMIT = 2048
-CONFIGURATION = "seq-sat-fdss-2018"
+CONFIGURATION = "seq-sat-lama-2011"
 DIR = Path(__file__).resolve().parent
 
 if REMOTE:
@@ -83,7 +83,7 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     run.add_resource("problem", task.problem_file, symlink=True)
     run.add_command(
         "solve",
-        ["fast-downward.py", "--alias", CONFIGURATION, "--overall-time-limit", "30m", "{domain}", "{problem}"],
+        ["fast-downward.py", "--alias", CONFIGURATION, "{domain}", "{problem}"],
         time_limit=TIME_LIMIT,
         memory_limit=MEMORY_LIMIT,
     )
