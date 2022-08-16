@@ -4,3 +4,4 @@
 **/__pychache__
 *.sas
 **/.venv
+*bm*.bio
