@@ -43,7 +43,8 @@ if REMOTE:
         memory_per_cpu="3790M",
         cpus_per_task=4,
         )
-    SUITE = ["durative_grounded_coords", "durative_lifted_coords", "durative_grounded_sequential", "durative_lifted_sequential"]
+    # SUITE = ["durative_grounded_coords", "durative_lifted_coords", "durative_grounded_sequential", "durative_lifted_sequential"]
+    SUITE = ["durative_grounded_coords:p9x9d5n001.pddl"]
 else:
     ENV = LocalEnvironment(processes=2)
     # Use smaller suite for local tests.
