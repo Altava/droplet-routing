@@ -68,6 +68,8 @@ exp = Experiment(environment=ENV)
 # exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
 exp.add_parser(DIR / "parser.py")
 
+exp.add_resource("run_singularity", DIR / "run-singularity.sh")
+
 for task in build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
     # Create a symbolic link and an alias. This is optional. We
@@ -75,11 +77,24 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     run.add_resource("domain", task.domain_file, symlink=True)
     run.add_resource("problem", task.problem_file, symlink=True)
     run.add_command(
-        "solve",
-        ["plan", "{domain}", "{problem}", "solution.out"],
-        time_limit=TIME_LIMIT,
-        memory_limit=MEMORY_LIMIT,
-    )
+            "run-planner",
+            [
+                "runsolver",
+                "-C",
+                TIME_LIMIT,
+                "-V",
+                MEMORY_LIMIT,
+                "-w",
+                "watch.log",
+                "-v",
+                "values.log",
+                "{run_singularity}",
+                "/infai/burfab04/bin/tfd.sif",
+                "{domain}",
+                "{problem}",
+                "sas_plan",
+            ],
+        )
     # AbsoluteReport needs the following attributes:
     # 'domain', 'problem' and 'algorithm'.
     # domain = os.path.basename(os.path.dirname(task))
