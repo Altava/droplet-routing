@@ -10,20 +10,6 @@ from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
 from lab.reports import Attribute
 
-
-# Create custom report class with suitable info and error attributes.
-class BaseReport(AbsoluteReport):
-    INFO_ATTRIBUTES = ["time_limit", "memory_limit", "seed"]
-    ERROR_ATTRIBUTES = [
-        "domain",
-        "problem",
-        "algorithm",
-        "unexplained_errors",
-        "error",
-        "node",
-    ]
-
-
 NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 SCRIPT_DIR = os.environ["DOWNWARD_REPO"]
