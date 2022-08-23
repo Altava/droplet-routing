@@ -107,7 +107,7 @@ def improvement(run1, run2):
     return "worse"
 
 # Make a report.
-exp.add_report(ScatterPlotReport(attributes="search_time"), get_category=improvement, outfile="scatter_report.html")
+exp.add_report(ScatterPlotReport(attributes="search_time", get_category=improvement), outfile="scatter_report.html")
 
 # Parse the commandline and run the given steps.
 exp.run_steps()
