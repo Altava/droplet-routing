@@ -4,7 +4,7 @@ import os
 import platform
 
 from pathlib import Path
-from downward.reports.absolute import AbsoluteReport
+from downward.reports.scatter import ScatterPlotReport
 from downward.suites import build_suite
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
