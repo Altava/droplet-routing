@@ -67,7 +67,7 @@ exp = Experiment(environment=ENV)
 # exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
 # exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
-exp.add_parser(DIR / "parser.py")
+exp.add_parser(DIR / "parser_tfd.py")
 
 exp.add_resource("run_singularity", DIR / "run-singularity.sh")
 
