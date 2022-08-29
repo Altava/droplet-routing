@@ -1,0 +1,46 @@
+# The PCR (Polymerase Chain Reaction) problem on an 8 by 8 biochip
+# as described in
+# Chakraborty, Sarit & Chakraborty, Susanta (2020):
+# An efficient module-less synthesis approach
+# for Digital Microfluidic Biochips
+
+# 11 = Tris HCL
+# 12 = KCL
+# 13 = Bovine Serum
+# 14 = Gelatin
+# 15 = Primer
+# 16 = Beosynucleotide
+# 17 = AmpliTag
+# 18 = LamdaDNA
+# 1-7 = Mixture 1-7
+
+grid
+(1,1) (8,8)
+end
+
+mixings
+11 + 12 = 1
+13 + 14 = 2
+14 + 16 = 3
+17 + 18 = 4
+1 + 2 = 5
+3 + 4 = 6
+5 + 6 = 7
+end
+
+origins
+11 (1,7)
+12 (2,8)
+13 (7,8)
+14 (8,7)
+15 (1,2)
+16 (2,1)
+17 (7,1)
+18 (8,2)
+end
+
+# w marks the waste outlet
+targets
+7 (8,1)
+w (8,4)
+end
