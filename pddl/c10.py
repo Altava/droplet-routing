@@ -33,7 +33,7 @@ BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 # ALGORITHMS = ["2approx", "greedy"]
 SEED = 2018
 TIME_LIMIT = 1800
-MEMORY_LIMIT = 2048
+MEMORY_LIMIT = 3500
 CONFIGURATION = "lama-first"
 DIR = Path(__file__).resolve().parent
 
