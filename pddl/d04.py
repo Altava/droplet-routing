@@ -52,12 +52,13 @@ else:
 ATTRIBUTES = [
     # "cover",
     # "cover_size",
-    "error",
-    "run_dir",
+    "search_time",
     "total_time",
-    "solver_exit_code",
-    "expansions",
-    "memory",
+    "plan_length",
+    "plan_cost",
+    "expanded_states",
+    "branching_factor",
+    "generated_nodes",
     Attribute("solved", absolute=True),
 ]
 
