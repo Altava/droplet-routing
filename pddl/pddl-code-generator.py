@@ -1,3 +1,4 @@
+from curses.ascii import isdigit
 import os
 import argparse
 import re
@@ -6,6 +7,7 @@ durative = False
 preGrounding = False
 coordinates = False
 all = False
+mixing = False
 
 def validate_file(f):
     if not os.path.exists(f):
@@ -14,52 +16,96 @@ def validate_file(f):
 
 def parseFile(file):
     f = open(file, "r")
-    t = f.read().split("end")
+    content = f.read()
+    # t = f.read().split("end")
     # for i, elem in enumerate(t):
     #     print(i, elem)
 
-    x, y = t[0].split("grid")[1].split()[1].split(",")
+    x, y = re.search("(?s)grid(.*)end", content).group(1).split("end")[0].split()[1].split(",")
     x = int("".join(filter(str.isdigit, x)))
     y = int("".join(filter(str.isdigit, y)))
     print("size:", x, "by", y)
 
     block = []
 
-    blockages = list(filter(None, t[1].split("blockages")[1].split("\n")))
-    for b in blockages:
-        block.append(list(filter(None, re.split("[(), ]", b))))
-    print("blockages:", block)
+    blocksearch = re.search("(?s)blockages(.*)end", content)
+    if blocksearch:
+        blockages = list(filter(None, blocksearch.group(1).split("end")[0].split("\n")))
+        for b in blockages:
+            block.append(list(filter(None, re.split("[(), ]", b))))
+        print("blockages:", block)
 
     start = []
     goal = []
 
-    nets = list(filter(None, t[2].split("nets")[1].split("\n")))
-    for net in nets:
-        n, s, a, g = net.split()
-        sx, sy = s.split(",")
-        sx = sx.replace("(", "x")
-        sy = sy.replace(")", "")
-        sy = "y" + sy
-        start.append(" ".join((sx, sy)))
- 
-        gx, gy = g.split(",")
-        gx = gx.replace("(", "x")
-        gy = gy.replace(")", "")
-        gy = "y" + gy
-        goal.append(" ".join((gx, gy)))
-    print("start positions:", start)
-    print("goal positions:", goal)
+    netsearch = re.search("(?s)nets(.*)end", content)
+    if netsearch:
+        nets = list(filter(None, netsearch.group(1).split("end")[0].split("\n")))
+        ni = 1
+        for net in nets:
+            n, s, a, g = net.split()
+            sx, sy = s.split(",")
+            sx = sx.replace("(", "x")
+            sy = sy.replace(")", "")
+            sy = "y" + sy
+            start.append(" ".join((ni, sx, sy)))
+    
+            gx, gy = g.split(",")
+            gx = gx.replace("(", "x")
+            gy = gy.replace(")", "")
+            gy = "y" + gy
+            goal.append(" ".join((ni, gx, gy)))
 
-    return x, y, start, goal, block
+            ni += 1
+        print("start positions:", start)
+        print("goal positions:", goal)
+    
+    mix = []
+
+    mixsearch = re.search("(?s)mixings(.*)end", content)
+    if mixsearch:
+        global mixing
+        mixing = True
+        mixings = list(filter(None, mixsearch.group(1).split("end")[0].split("\n")))
+        for mx in mixings:
+            elem = re.search("(\d+) \+ (\d+) = (\d+)", mx).group(1, 2, 3)
+            mix.append(elem)
+
+    originssearch = re.search("(?s)origins(.*)end", content)
+    if originssearch:
+        origins = list(filter(None, originssearch.group(1).split("end")[0].split("\n")))
+        for og in origins:
+            elem = re.search("(\d+) \((\d+),(\d+)\)", og).group(1, 2, 3)
+            start.append(elem[0] + " x" + elem[1] + " y" + elem[2])
+
+    targetsearch = re.search("(?s)targets(.*)end", content)
+    if targetsearch:
+        targets = list(filter(None, targetsearch.group(1).split("end")[0].split("\n")))
+        for tg in targets:
+            elem = re.search("(.+) \((\d+),(\d+)\)", tg).group(1, 2, 3)
+            if elem[0].isdigit():
+                goal.append(elem[0] + " x" + elem[1] + " y" + elem[2])
+
+    return x, y, start, goal, block, mix
 
 def sc(x, y, xmax):
     return x + (y-1) * xmax
 
 def ss(drop, xmax):
-    x, y = drop.split()
+    d, x, y = drop.split()
+    x = int("".join(filter(str.isdigit, x)))
+    y = int("".join(filter(str.isdigit, y)))
+    return d + " c%i" % (sc(x, y, xmax))
+
+def sss(drop, xmax):
+    d, x, y = drop.split()
     x = int("".join(filter(str.isdigit, x)))
     y = int("".join(filter(str.isdigit, y)))
     return "c%i" % (sc(x, y, xmax))
+
+def cs(drop):
+    d, x, y = drop.split()
+    return x + " " + y
 
 def print_neighbours(x, y, f):
     global coordinates
@@ -129,10 +175,11 @@ def print_vicinity(x, y, f):
                     if iy < y:
                         f.write("    (VICINITY c%i c%i)\n" % (ix + (iy - 1) * x, ix - 1 + iy * x))
 
-def print_domain(x, y, droplets, blockages, n, duration=1):
+def print_domain(x, y, droplets, blockages, n="", duration=1):
     global durative
     global preGrounding
     global coordinates
+    global mixing
 
     if durative:
         f1 = "durative_"
@@ -221,8 +268,10 @@ def print_domain(x, y, droplets, blockages, n, duration=1):
     if not preGrounding:
         f.write("    (VICINITY " + originTypeWithType + " " + targetTypeWithType + ")\n")
         f.write("    (NEIGHBOUR " + originTypeWithType + " " + targetTypeWithType + ")\n")
-        f.write("    (blocked " + coordTypeWithType + ")")
-    f.write("\n)\n\n")
+        f.write("    (blocked " + coordTypeWithType + ")\n")
+    if mixing:
+        f.write("    (MIX ?d1 ?d2 ?dt - droplet)\n")
+    f.write(")\n\n")
 
     if not preGrounding:
         f.write("(" + actionType + " move\n    :parameters (?d - droplet ")
@@ -412,11 +461,35 @@ def print_domain(x, y, droplets, blockages, n, duration=1):
                             f.write("    )\n")
                             f.write(")\n")
 
+    if mixing:
+        if not(durative) and not(preGrounding) and coordinates:
+            f.write("(:action merge\n")
+            f.write("    :parameters (?d1 ?d2 ?d3 - droplet ?x1 ?x2 ?xt - xcoord ?y1 ?y2 ?yt - ycoord)\n")
+
+            f.write("    :precondition (and\n")
+            f.write("        (droplet-at ?d1 ?x1 ?y1)\n")
+            f.write("        (droplet-at ?d2 ?x2 ?y2)\n")
+            f.write("        (NEIGHBOUR ?x1 ?y1 ?xt ?yt)\n")
+            f.write("        (NEIGHBOUR ?x2 ?y2 ?xt ?yt)\n")
+            f.write("        (not (blocked ?xt ?yt))\n")
+            f.write("        (MIX ?d1 ?d2 ?d3)\n")
+            f.write("    )\n")
+
+            f.write("    :effect (and\n")
+            f.write("        (not (droplet-at ?d1 ?x1 ?y1))\n")
+            f.write("        (not (droplet-at ?d2 ?x2 ?y2))\n")
+            f.write("        (droplet-at ?d3 ?xt ?yt)\n")
+            f.write("        (not (occupied ?x1 ?y1))\n")
+            f.write("        (not (occupied ?x2 ?y2))\n")
+            f.write("        (occupied ?xt ?yt)\n")
+            f.write("    )\n")
+            f.write(")\n")
+
     f.write("\n)")
 
     f.close()
 
-def print_problem(x, y, droplets, goals, blockages, n):
+def print_problem(x, y, droplets, goals, blockages, mix, n=""):
     global durative
     global preGrounding
     global coordinates
@@ -455,10 +528,24 @@ def print_problem(x, y, droplets, goals, blockages, n):
     f = open(filename, "x")
     f.write("(define (problem p%ix%id%in" % (x, y, len(droplets)) + n + ") (:domain p%ix%id%in" % (x, y, len(droplets)) + n + "-domain)\n\n")
 
+    dropletlist = []
+    for dr in droplets:
+        d, _, _ = dr.split()
+        dropletlist.append(d)
+    for gl in goals:
+        d, _, _ = gl.split()
+        dropletlist.append(d)
+    for mx in mix:
+        dropletlist.append(mx[0])
+        dropletlist.append(mx[1])
+        dropletlist.append(mx[2])
+    
+    dropletlist = list(dict.fromkeys(dropletlist))
+
     # List all objects - in the problem file we only need the droplets.
     f.write("(:objects\n    ")
-    for d in range(1, len(droplets)+1):
-        f.write("droplet%i " % (d))
+    for d in dropletlist:
+        f.write("droplet" + d + " ")
     f.write("- droplet\n    ")
 
     if coordinates:
@@ -479,12 +566,15 @@ def print_problem(x, y, droplets, goals, blockages, n):
     i = 1
     for d in droplets:
         if coordinates:
-            f.write("    (droplet-at droplet%i " % (i) + d + ")\n")
-            f.write("    (occupied " + d + ")\n")
+            f.write("    (droplet-at droplet" + d + ")\n")
+            f.write("    (occupied " + cs(d) + ")\n")
         else:
-            f.write("    (droplet-at droplet%i " % (i) + ss(d, x) + ")\n")
-            f.write("    (occupied " + ss(d, x) + ")\n")
+            f.write("    (droplet-at droplet" + ss(d, x) + ")\n")
+            f.write("    (occupied " + sss(d, x) + ")\n")
         i+=1
+
+    for m in mix:
+        f.write("    (MIX droplet" + m[0] + " droplet" + m[1] + " droplet" + m[2] + ")\n")
 
     if not preGrounding:
         print_neighbours(x, y, f)
@@ -504,9 +594,9 @@ def print_problem(x, y, droplets, goals, blockages, n):
     i = 1
     for g in goals:
         if coordinates:
-            f.write("    (droplet-at droplet%i " % (i) + g + ")\n")
+            f.write("    (droplet-at droplet" + g + ")\n")
         else:
-            f.write("    (droplet-at droplet%i " % (i) + ss(g, x) + ")\n")
+            f.write("    (droplet-at droplet" + ss(g, x) + ")\n")
         i+=1
     f.write("))\n)\n")
 
@@ -539,8 +629,8 @@ if __name__ == '__main__':
         all = True
     
     if args.path:
-        x, y, start, goal, block = parseFile(args.path[0])
-        currentSet = (x, y, start, goal, block)
+        x, y, start, goal, block, mix = parseFile(args.path[0])
+        currentSet = (x, y, start, goal, block, mix)
 
     elif args.dir:
         dir = args.dir[0]
@@ -555,7 +645,7 @@ if __name__ == '__main__':
                 for preGrounding in [True, False]:
                     for coordinates in [True, False]:
                         print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4], n)
-                        print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4], n)
+                        print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4], currentSet[5], n)
 
     else:
         set1 = (3, 3, ("x1 y1", "x3 y3"), ("x3 y3", "x1 y1"), ())
@@ -580,11 +670,11 @@ if __name__ == '__main__':
             for preGrounding in [True, False]:
                 for coordinates in [True, False]:
                     print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4])
-                    print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
+                    print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4], currentSet[5])
         print("Domain and problem files generated.")
         
     else:
         if not args.dir:
             print_domain(currentSet[0], currentSet[1], currentSet[2], currentSet[4])
-            print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4])
+            print_problem(currentSet[0], currentSet[1], currentSet[2], currentSet[3], currentSet[4], currentSet[5])
             print("Domain and problem files generated.")
