@@ -112,7 +112,7 @@ exp.add_step("start", exp.start_runs)
 exp.add_fetcher(name="fetch")
 
 def add_score(run):
-    success = run.get["solved"]
+    success = run.get("solved")
 
     try:
         max_time = run["limit_search_time"]
