@@ -13,16 +13,16 @@ from lab import tools
 
 
 # Create custom report class with suitable info and error attributes.
-class BaseReport(AbsoluteReport):
-    INFO_ATTRIBUTES = ["time_limit", "memory_limit", "seed"]
-    ERROR_ATTRIBUTES = [
-        "domain",
-        "problem",
-        "algorithm",
-        "unexplained_errors",
-        "error",
-        "node",
-    ]
+# class BaseReport(AbsoluteReport):
+#     INFO_ATTRIBUTES = ["time_limit", "memory_limit", "seed"]
+#     ERROR_ATTRIBUTES = [
+#         "domain",
+#         "problem",
+#         "algorithm",
+#         "unexplained_errors",
+#         "error",
+#         "node",
+#     ]
 
 
 NODE = platform.node()
