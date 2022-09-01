@@ -51,10 +51,7 @@ else:
     # Use smaller suite for local tests.
     # SUITE = BHOSLIB_GRAPHS[:1] + RANDOM_GRAPHS[:1]
 ATTRIBUTES = [
-    # "cover",
-    # "cover_size",
     "error",
-    "run_dir",
     "total_time",
     "search_time",
     "plan_length",
@@ -65,6 +62,8 @@ ATTRIBUTES = [
     "solver_exit_code",
     "expansions",
     "memory",
+    "score_total_time",
+    "score_search_time",
     Attribute("solved", absolute=True),
 ]
 
@@ -128,7 +127,7 @@ def add_score(run):
         )
 
 # Make a report.
-report = Report(filter_domain=["classical_grounded_coords", "classical_lifted_coords"], attributes=ATTRIBUTES, filter=["add_score"])
+report = Report(filter_domain=["classical_grounded_coords", "classical_lifted_coords"], attributes=ATTRIBUTES, filter=[add_score])
 exp.add_report(report)
 
 # Parse the commandline and run the given steps.
