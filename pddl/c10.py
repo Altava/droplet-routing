@@ -125,6 +125,7 @@ def add_score(run):
         run["score_search_time"] = tools.compute_log_score(
             success, run.get("search_time"), lower_bound=1.0, upper_bound=max_time
         )
+    return run
 
 # Make a report.
 report = Report(filter_domain=["classical_grounded_coords", "classical_lifted_coords"], attributes=ATTRIBUTES, filter=[add_score])
