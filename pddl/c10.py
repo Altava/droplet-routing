@@ -4,11 +4,12 @@ import os
 import platform
 
 from pathlib import Path
-from downward.reports.absolute import AbsoluteReport
+from downward.reports import Report
 from downward.suites import build_suite
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
 from lab.reports import Attribute
+from lab import tools
 
 
 # Create custom report class with suitable info and error attributes.
@@ -111,8 +112,27 @@ exp.add_step("start", exp.start_runs)
 # writes them to *-eval/properties.
 exp.add_fetcher(name="fetch")
 
+def add_score(run):
+    success = run.get["total_time"] != "None"
+
+    run_dir = os.path.abspath(".")
+    prop_file = os.path.join(run_dir, "properties")
+    props = tools.Properties(filename=prop_file)
+    try:
+        max_time = props["limit_search_time"]
+    except KeyError:
+        print("search time limit missing -> can't compute time scores")
+    else:
+        run["score_total_time"] = tools.compute_log_score(
+            success, run.get("total_time"), lower_bound=1.0, upper_bound=max_time
+        )
+        run["score_search_time"] = tools.compute_log_score(
+            success, run.get("search_time"), lower_bound=1.0, upper_bound=max_time
+        )
+
 # Make a report.
-exp.add_report(BaseReport(attributes=ATTRIBUTES), outfile="report.html")
+report = Report(filter_domain=["classical_grounded_coords", "classical_lifted_coords"], attributes=ATTRIBUTES, filter=["add_score"], outfile="report.html")
+exp.add_report(report)
 
 # Parse the commandline and run the given steps.
 exp.run_steps()
