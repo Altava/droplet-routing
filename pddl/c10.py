@@ -115,7 +115,7 @@ def add_score(run):
     success = run.get("solved")
 
     try:
-        max_time = run["limit_search_time"]
+        max_time = run["time_limit"]
     except KeyError:
         print("search time limit missing -> can't compute time scores")
     else:
