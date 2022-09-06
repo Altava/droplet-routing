@@ -48,10 +48,9 @@ if REMOTE:
     SUITE = ["classical_grounded_coords", "classical_lifted_coords", "classical_grounded_sequential", "classical_lifted_sequential"]
 else:
     ENV = LocalEnvironment(processes=2)
-    # Use smaller suite for local tests.
-    # SUITE = BHOSLIB_GRAPHS[:1] + RANDOM_GRAPHS[:1]
+    print("Not on cluster!")
+    SUITE = []
 ATTRIBUTES = [
-    "error",
     "total_time",
     "search_time",
     "plan_length",
@@ -59,12 +58,8 @@ ATTRIBUTES = [
     "evaluations",
     "expanded_states",
     "registered_states",
-    "solver_exit_code",
-    "expansions",
-    "memory",
     "score_total_time",
-    "score_search_time",
-    Attribute("solved", absolute=True),
+    "score_search_time"
 ]
 
 # Create a new experiment.
@@ -112,7 +107,7 @@ exp.add_step("start", exp.start_runs)
 exp.add_fetcher(name="fetch")
 
 def add_score(run):
-    success = run.get("solved")
+    success = isinstance(run.get("plan_cost"), float)
 
     try:
         max_time = run["time_limit"]
