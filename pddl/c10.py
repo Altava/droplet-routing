@@ -8,7 +8,6 @@ from downward.reports import Report
 from downward.suites import build_suite
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
-from downward.reports.scatter import ScatterPlotReport
 from lab import tools
 
 
@@ -120,21 +119,10 @@ def add_score(run):
         run["score_search_time"] = tools.compute_log_score(
             success, run.get("search_time"), lower_bound=1.0, upper_bound=max_time
         )
-    return run
-
-def score(run1, run2):
-    score1 = run1.get("score_search_time")
-    score2 = run2.get("score_search_time")
-    if score1 > score2:
-        return "better"
-    if score2 < score2:
-        return "worse"
-    return "equal"
 
 # Make a report.
 report = Report(filter_domain=["classical_grounded_coords", "classical_lifted_coords"], attributes=ATTRIBUTES, filter=[add_score])
-scatterReport = ScatterPlotReport(attributes=["score_search_time"], get_category=score, filter=[add_score])
-exp.add_report(scatterReport)
+exp.add_report(report)
 
 # Parse the commandline and run the given steps.
 exp.run_steps()
