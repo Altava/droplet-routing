@@ -1,5 +1,9 @@
 **/data
-*.pddl
+*p*x*[0-9]d*.pddl
+p_*.pddl
+domain_*.pddl
+domain.pddl
+p01.pddl
 **/.vscode
 **/__pychache__
 *.sas
