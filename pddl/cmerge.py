@@ -28,9 +28,6 @@ NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 SCRIPT_DIR = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
-# BHOSLIB_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "bhoslib", "*.mis")))
-# RANDOM_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "random", "*.txt")))
-# ALGORITHMS = ["2approx", "greedy"]
 SEED = 2018
 TIME_LIMIT = 1800
 MEMORY_LIMIT = 3500
@@ -44,16 +41,12 @@ if REMOTE:
         memory_per_cpu="3790M",
         cpus_per_task=4,
         )
-    SUITE = ["classical_lifted_coords:p8x8d8n.pddl"]
+    SUITE = ["merge_test"]
 else:
     ENV = LocalEnvironment(processes=2)
     # Use smaller suite for local tests.
     # SUITE = BHOSLIB_GRAPHS[:1] + RANDOM_GRAPHS[:1]
 ATTRIBUTES = [
-    # "cover",
-    # "cover_size",
-    "error",
-    "run_dir",
     "total_time",
     "search_time",
     "plan_length",
@@ -87,15 +80,9 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
         time_limit=TIME_LIMIT,
         memory_limit=MEMORY_LIMIT,
     )
-    # AbsoluteReport needs the following attributes:
-    # 'domain', 'problem' and 'algorithm'.
-    # domain = os.path.basename(os.path.dirname(task))
-    # task_name = os.path.basename(task)
     run.set_property("domain", task.domain)
     run.set_property("problem", task.problem)
     run.set_property("algorithm", CONFIGURATION)
-    # BaseReport needs the following properties:
-    # 'time_limit', 'memory_limit', 'seed'.
     run.set_property("time_limit", TIME_LIMIT)
     run.set_property("memory_limit", MEMORY_LIMIT)
     # Every run has to have a unique id in the form of a list.
