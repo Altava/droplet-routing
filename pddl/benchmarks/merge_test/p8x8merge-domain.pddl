@@ -16,7 +16,7 @@
     (NEIGHBOUR ?xo - xcoord ?yo - ycoord ?xt - xcoord ?yt - ycoord)
     (blocked ?x - xcoord ?y - ycoord)
     (MIX ?d1 ?d2 ?dt - droplet)
-    (small ?d - droplet)
+    (small ?d - droplet ?x - xcoord ?y - ycoord)
 )
 
 (:action spawn_HCL
@@ -32,7 +32,7 @@
     :effect (and
         (droplet-at droplet11 x1 y7)
         (occupied x1 y7)
-        (small droplet11)
+        (small droplet11 x1 y7)
     )
 )
 
@@ -49,7 +49,7 @@
     :effect (and
         (droplet-at droplet12 x2 y8)
         (occupied x2 y8)
-        (small droplet12)
+        (small droplet12 x2 y8)
     )
 )
 
@@ -66,7 +66,7 @@
     :effect (and
         (droplet-at droplet13 x7 y8)
         (occupied x7 y8)
-        (small droplet13)
+        (small droplet13 x7 y8)
     )
 )
 
@@ -83,7 +83,7 @@
     :effect (and
         (droplet-at droplet14 x8 y7)
         (occupied x8 y7)
-        (small droplet14)
+        (small droplet14 x8 y7)
     )
 )
 
@@ -100,7 +100,7 @@
     :effect (and
         (droplet-at droplet15 x1 y2)
         (occupied x1 y2)
-        (small droplet15)
+        (small droplet15 x1 y2)
     )
 )
 
@@ -117,7 +117,7 @@
     :effect (and
         (droplet-at droplet16 x2 y1)
         (occupied x2 y1)
-        (small droplet16)
+        (small droplet16 x2 y1)
     )
 )
 
@@ -134,7 +134,7 @@
     :effect (and
         (droplet-at droplet17 x7 y1)
         (occupied x7 y1)
-        (small droplet17)
+        (small droplet17 x7 y1)
     )
 )
 
@@ -151,7 +151,7 @@
     :effect (and
         (droplet-at droplet18 x8 y2)
         (occupied x8 y2)
-        (small droplet18)
+        (small droplet18 x8 y2)
     )
 )
 
@@ -195,8 +195,8 @@
     :precondition (and
         (droplet-at ?d1 ?x1 ?y1)
         (droplet-at ?d2 ?x2 ?y2)
-        (small ?d1)
-        (small ?d2)
+        (small ?d1 ?x1 ?y1)
+        (small ?d2 ?x2 ?y2)
         (NEIGHBOUR ?x1 ?y1 ?xt ?yt)
         (NEIGHBOUR ?x2 ?y2 ?xt ?yt)
         (not (blocked ?xt ?yt))
@@ -219,7 +219,7 @@
         (NEIGHBOUR ?xo ?yo ?xl ?yo)
         (NEIGHBOUR ?xo ?yo ?xr ?yo)
         (not (= ?xl ?xr))
-        (not (small ?d))
+        (not (small ?d ?xo ?yo))
         (forall (?x - xcoord)
           (forall (?y - ycoord)
             (imply (and
@@ -237,9 +237,10 @@
     :effect (and
         (not (droplet-at ?d ?xo ?yo))
         (not (occupied ?xo ?yo))
-        (small ?d)
+        (small ?d ?xl ?yo)
         (droplet-at ?d ?xl ?yo)
         (occupied ?xl ?yo)
+        (small ?d ?xr ?yo)
         (droplet-at ?d ?xr ?yo)
         (occupied ?xr ?yo)
     )
@@ -252,7 +253,7 @@
         (NEIGHBOUR ?xo ?yo ?xo ?yt)
         (NEIGHBOUR ?xo ?yo ?xo ?yb)
         (not (= ?yt ?yb))
-        (not (small ?d))
+        (not (small ?d ?xo ?yo))
         (forall (?x - xcoord)
           (forall (?y - ycoord)
             (imply (and
@@ -270,9 +271,10 @@
     :effect (and
         (not (droplet-at ?d ?xo ?yo))
         (not (occupied ?xo ?yo))
-        (small ?d)
+        (small ?d ?xo ?yt)
         (droplet-at ?d ?xo ?yt)
         (occupied ?xo ?yt)
+        (small ?d ?yo ?yb)
         (droplet-at ?d ?xo ?yb)
         (occupied ?xo ?yb)
     )
