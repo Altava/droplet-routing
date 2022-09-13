@@ -662,6 +662,16 @@
 )
 
 (:goal (and
-    (droplet-at droplet7 x8 y1)
+    (small droplet7)
+    (forall (?x - xcoord)
+      (forall (?y - ycoord)
+        (forall (?d - droplet)
+            (imply
+                (not (= ?d droplet7))
+                (not (droplet-at ?d ?x ?y))
+            )
+        )
+      )
+    )
 ))
 )
