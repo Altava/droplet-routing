@@ -44,8 +44,8 @@ def generate(x=9, y=9, droplets=5, blockages=3, min_block_size=2, benchmarks=1):
         # generate blockages
         for i in range(0,blockages):
             # generate a randomly sized blockage
-            x_size = rng.randint(min_block_size, int(x/2))
-            y_size = rng.randint(min_block_size, int(y/2))
+            x_size = rng.randint(min_block_size, min(int((x-2)/2), 6))
+            y_size = rng.randint(min_block_size, min(int((y-2)/2), 6))
             # origins is a list of positions that may be suitable as lower left part of the blockage
             origins = []
             int_x = 0

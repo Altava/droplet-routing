@@ -48,13 +48,13 @@ def parseFile(file):
             sx = sx.replace("(", "x")
             sy = sy.replace(")", "")
             sy = "y" + sy
-            start.append(" ".join((ni, sx, sy)))
+            start.append(" ".join((str(ni), sx, sy)))
     
             gx, gy = g.split(",")
             gx = gx.replace("(", "x")
             gy = gy.replace(")", "")
             gy = "y" + gy
-            goal.append(" ".join((ni, gx, gy)))
+            goal.append(" ".join((str(ni), gx, gy)))
 
             ni += 1
         print("start positions:", start)
@@ -219,7 +219,9 @@ def print_domain(x, y, droplets, blockages, n="", duration=1):
         targetTypeWithType = "?ct - coordinate"
         equalityType = "(= ?c ?co)"
 
-    domainfile = "p%ix%id%in" % (x, y, len(droplets)) + n + "-domain.pddl"
+    print("n:")
+    print(n)
+    domainfile = "p%ix%id%ib%in" % (x, y, len(droplets), len(blockages)) + n + "-domain.pddl"
     parentname = os.path.dirname(__file__)
     dirname = os.path.join(parentname, "benchmarks", f1 + f2 + f3)
 
@@ -510,7 +512,7 @@ def print_problem(x, y, droplets, goals, blockages, mix, n=""):
         f3 = "sequential"
 
     # Name the problem file.
-    problemfile = "p%ix%id%in" % (x, y, len(droplets)) + n + ".pddl"
+    problemfile = "p%ix%id%ib%in" % (x, y, len(droplets), len(blockages)) + n + ".pddl"
     parentname = os.path.dirname(__file__)
     dirname = os.path.join(parentname, "benchmarks", f1 + f2 + f3)
 
@@ -638,9 +640,9 @@ if __name__ == '__main__':
         print(os.listdir(dir))
         for fl in os.listdir(dir):
             print("Current file: " + fl)
-            x, y, start, goal, block = parseFile(os.path.join(dir, fl))
+            x, y, start, goal, block, mix = parseFile(os.path.join(dir, fl))
             n, ext = os.path.splitext(fl)
-            currentSet = (x, y, start, goal, block)
+            currentSet = (x, y, start, goal, block, mix)
             for durative in [True, False]:
                 for preGrounding in [True, False]:
                     for coordinates in [True, False]:
