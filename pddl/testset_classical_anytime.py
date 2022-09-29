@@ -67,7 +67,7 @@ exp = Experiment(environment=ENV)
 # exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
 # exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
-exp.add_parser(DIR / "parser.py")
+exp.add_parser(DIR / "parser_anytime.py")
 
 for task in build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
@@ -121,7 +121,7 @@ def add_score(run):
         )
 
 # Make a report.
-report = Report(filter_domain=["classical_grounded_coords", "classical_lifted_coords"], attributes=ATTRIBUTES, filter=[add_score])
+report = Report(attributes=ATTRIBUTES, filter=[add_score])
 exp.add_report(report)
 
 # Parse the commandline and run the given steps.
