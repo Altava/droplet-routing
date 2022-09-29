@@ -30,15 +30,15 @@ SCRIPT_DIR = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 SEED = 2018
 TIME_LIMIT = 1800
-MEMORY_LIMIT = 3500
+MEMORY_LIMIT = 6000
 CONFIGURATION = "lama-first"
 DIR = Path(__file__).resolve().parent
 
 if REMOTE:
     ENV = BaselSlurmEnvironment(
         email="f.burch@unibas.ch",
-        partition="infai_1",
-        memory_per_cpu="3790M",
+        partition="infai_2",
+        memory_per_cpu="6G",
         cpus_per_task=4,
         )
     SUITE = ["merge_test"]
