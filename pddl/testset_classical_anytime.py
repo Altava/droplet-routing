@@ -55,7 +55,7 @@ ATTRIBUTES = [
     "id",
     "memory_limit",
     "plan_cost_over_time",
-    "plan_lengt_over_time",
+    "plan_length_over_time",
     "problem",
     "run_dir",
     "time_limit",
