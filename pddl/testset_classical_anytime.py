@@ -105,23 +105,8 @@ exp.add_step("start", exp.start_runs)
 # writes them to *-eval/properties.
 exp.add_fetcher(name="fetch")
 
-def add_score(run):
-    success = isinstance(run.get("plan_cost"), float)
-
-    try:
-        max_time = run["time_limit"]
-    except KeyError:
-        print("search time limit missing -> can't compute time scores")
-    else:
-        run["score_total_time"] = tools.compute_log_score(
-            success, run.get("total_time"), lower_bound=1.0, upper_bound=max_time
-        )
-        run["score_search_time"] = tools.compute_log_score(
-            success, run.get("search_time"), lower_bound=1.0, upper_bound=max_time
-        )
-
 # Make a report.
-report = Report(attributes=ATTRIBUTES, filter=[add_score])
+report = Report(attributes=ATTRIBUTES)
 exp.add_report(report)
 
 # Parse the commandline and run the given steps.
