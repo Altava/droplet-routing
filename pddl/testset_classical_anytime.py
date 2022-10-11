@@ -50,15 +50,16 @@ else:
     print("Not on cluster!")
     SUITE = []
 ATTRIBUTES = [
-    "total_time",
-    "search_time",
-    "plan_length",
-    "plan_cost",
-    "evaluations",
-    "expanded_states",
-    "registered_states",
-    "score_total_time",
-    "score_search_time"
+    "algorithm",
+    "domain",
+    "id",
+    "memory_limit",
+    "plan_cost_over_time",
+    "plan_lengt_over_time",
+    "problem",
+    "run_dir",
+    "time_limit",
+    "times_over_time"
 ]
 
 # Create a new experiment.
