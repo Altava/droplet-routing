@@ -52,7 +52,6 @@ ATTRIBUTES = [
     # "cover",
     # "cover_size",
     "search_time",
-    "total_time",
     "plan_length",
     "plan_cost",
     "expanded_states",
@@ -67,7 +66,7 @@ exp = Experiment(environment=ENV)
 # exp.add_resource("solver", os.path.join(SCRIPT_DIR, "fast-downward.py"))
 # Add custom parser.
 # exp.add_parser(os.path.join(SCRIPT_DIR, "experiments/cg-vs-ff/parser.py"))
-exp.add_parser(DIR / "parser_tfd.py")
+exp.add_parser(DIR / "parser_tfd_anytime.py")
 
 exp.add_resource("run_singularity", DIR / "run-singularity.sh")
 
@@ -90,7 +89,7 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
                 "-v",
                 "values.log",
                 "{run_singularity}",
-                "/infai/burfab04/bin/tfd_anytime.sif",
+                "/infai/burfab04/bin/tfd_time.sif",
                 "{domain}",
                 "{problem}"
             ],
