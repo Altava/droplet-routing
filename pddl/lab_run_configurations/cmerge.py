@@ -41,7 +41,7 @@ if REMOTE:
         memory_per_cpu="6G",
         cpus_per_task=4,
         )
-    SUITE = ["merge_test"]
+    SUITE = ["merge_test:p8x8merge_reagent_v2.pddl"]
 else:
     ENV = LocalEnvironment(processes=2)
     # Use smaller suite for local tests.
