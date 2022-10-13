@@ -3,8 +3,8 @@
 (:objects
     hcl kcl bovine gelatin primer beosynucleotide amplitag lambdadna firstmix1 firstmix2 firstmix3 firstmix4 secondmix1 secondmix2 finalmix - reagent
     xcoord ycoord - coordinate
-    x1 x2 x3 x4 - xcoord
-    y1 y2 y3 y4 - ycoord
+    x1 x2 x3 x4 x5 x6 x7 x8 - xcoord
+    y1 y2 y3 y4 y5 y6 y7 y8 - ycoord
     p0 p5 p10 p15 p20 p25 p30 p35 p40 p45 p50 p55 p60 p65 p70 p75 p80 p85 p90 p95 p100 - percentage
 )
 
@@ -712,6 +712,6 @@
 
 (:goal (and
     (small x1 y1)
-    (reagent-type finalmix x1 y1)
+    (reagent-type firstmix1 x1 y1)
 ))
 )
