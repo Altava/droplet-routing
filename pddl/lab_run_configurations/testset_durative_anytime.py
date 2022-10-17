@@ -76,6 +76,7 @@ for task in build_suite(BENCHMARKS_DIR, SUITE):
     # could also use absolute paths in add_command().
     run.add_resource("domain", task.domain_file, symlink=True)
     run.add_resource("problem", task.problem_file, symlink=True)
+    run.add_command("log-limit", soft_stdout_limit=2048)
     run.add_command(
             "run-planner",
             [
