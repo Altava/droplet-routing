@@ -5,41 +5,24 @@ import re
 
 from lab.parser import Parser
 
+def parse_times_over_time(content, props):
+    matches = re.findall(r"Found plan after (\d+) sec.", content)
+    props["times_over_time"] = [(float(t), float(s)) for t, s in matches]
+
+def parse_plan_length_over_time(content, props):
+    matches = re.findall(r"Plan length: (\d+) step\(s\).", content)
+    props["plan_length_over_time"] = [int(s) for s in matches]
+
+def parse_plan_cost_over_time(content, props):
+    matches = re.findall(r"Makespan   : (.+)", content)
+    props["plan_cost_over_time"] = [int(s) for s in matches]
 
 def main():
     parser = Parser()    
-    parser.add_pattern(
-        "search_time",
-        r"Found plan after (\d+) sec.",
-        type=int,
-    )
-    parser.add_pattern(
-        "plan_length",
-        r"Plan length: (\d+) step\(s\).",
-        type=int,
-    )
-    parser.add_pattern(
-        "plan_cost",
-        r"Makespan   : (.+)",
-        type=float,
-    )
-    parser.add_pattern(
-        "branching_factor",
-        r"Overall branching factor by list sizes: (.+)",
-        type=float,
-    )
-    parser.add_pattern(
-        "expanded_states",
-        r"Expanded Nodes: (\d+) state\(s\).",
-        type=int,
-    )
-    parser.add_pattern(
-        "generated_nodes",
-        r"Generated Nodes: (\d+) state\(s\).",
-        type=int,
-    )
+    parser.add_function(parse_times_over_time)
+    parser.add_function(parse_plan_length_over_time)
+    parser.add_function(parse_plan_cost_over_time)
     parser.parse()
-
 
 if __name__ == "__main__":
     main()
