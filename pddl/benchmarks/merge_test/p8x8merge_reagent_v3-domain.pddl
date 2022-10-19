@@ -1,14 +1,14 @@
 (define (domain p8x8d8n-domain)
 
-(:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions :universal-preconditions :equality)
+(:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions :universal-preconditions)
 
 (:types
     reagent coordinate percentage - object
     xcoord ycoord - coordinate
-    x1 x2 x3 x4 - xcoord
-    y1 y2 y3 y4 - ycoord
-    hcl kcl bovine gelatin - reagent
-    p0 p20 p40 p60 p80 p100 - percentage
+    x1 x2 x3 x4 x5 x6 x7 x8 - xcoord
+    y1 y2 y3 y4 y5 y6 y7 y8 - ycoord
+    hcl kcl bovine gelatin primer beosynucleotide amplitag lambdadna - reagent
+    p0 p5 p10 p15 p20 p25 p30 p35 p40 p45 p50 p55 p60 p65 p70 p75 p80 p85 p90 p95 p100 - percentage
 )
 
 (:predicates
@@ -28,6 +28,8 @@
     (moved-once ?x - xcoord ?y - ycoord)
     (moved-twice ?x - xcoord ?y - ycoord)
     (moved-three-times ?x - xcoord ?y - ycoord)
+    (moved-four-times ?x - xcoord ?y - ycoord)
+    (moved-five-times ?x - xcoord ?y - ycoord)
     (ISEAST ?x1 ?x2 - xcoord)
     (ISWEST ?x1 ?x2 - xcoord)
     (ISNORTH ?y1 ?y2 - ycoord)
@@ -35,6 +37,79 @@
 )
 
 (:action spawn_HCL
+    :parameters ()
+    :precondition (and
+        (not (occupied x1 y6))
+        (not (occupied x1 y7))
+        (not (occupied x1 y8))
+        (not (occupied x2 y6))
+        (not (occupied x2 y7))
+        (not (occupied x2 y8))
+    )
+    :effect (and
+        (reagent-type hcl x1 y7)
+        (occupied x1 y7)
+        (small x1 y7)
+        (mix-percentage p100 x1 y7)
+    )
+)
+
+(:action spawn_KCL
+    :parameters ()
+    :precondition (and
+        (not (occupied x1 y7))
+        (not (occupied x2 y7))
+        (not (occupied x3 y7))
+        (not (occupied x1 y8))
+        (not (occupied x2 y8))
+        (not (occupied x3 y8))
+    )
+    :effect (and
+        (reagent-type kcl x2 y8)
+        (occupied x2 y8)
+        (small x2 y8)
+        (small x2 y8)
+        (mix-percentage p100 x2 y8)
+    )
+)
+
+(:action spawn_Bovine
+    :parameters ()
+    :precondition (and
+        (not (occupied x6 y7))
+        (not (occupied x7 y7))
+        (not (occupied x8 y7))
+        (not (occupied x6 y8))
+        (not (occupied x7 y8))
+        (not (occupied x8 y8))
+    )
+    :effect (and
+        (reagent-type bovine x7 y8)
+        (occupied x7 y8)
+        (small x7 y8)
+        (mix-percentage p100 x7 y8)
+    )
+)
+
+(:action spawn_Gelatin
+    :parameters ()
+    :precondition (and
+        (not (occupied x7 y6))
+        (not (occupied x7 y7))
+        (not (occupied x7 y8))
+        (not (occupied x8 y6))
+        (not (occupied x8 y7))
+        (not (occupied x8 y8))
+    )
+    :effect (and
+        (reagent-type gelatin x8 y7)
+        (occupied x8 y7)
+        (small x8 y7)
+        (mix-percentage p100 x8 y7)
+    )
+)
+
+(:action spawn_Primer
     :parameters ()
     :precondition (and
         (not (occupied x1 y1))
@@ -45,83 +120,85 @@
         (not (occupied x2 y3))
     )
     :effect (and
-        (reagent-type hcl x1 y2)
+        (reagent-type primer x1 y2)
         (occupied x1 y2)
         (small x1 y2)
         (mix-percentage p100 x1 y2)
     )
 )
 
-(:action spawn_KCL
+(:action spawn_Beosynucleotide
     :parameters ()
     :precondition (and
-        (not (occupied x1 y3))
-        (not (occupied x2 y3))
-        (not (occupied x1 y4))
-        (not (occupied x2 y4))
-    )
-    :effect (and
-        (reagent-type kcl x1 y4)
-        (occupied x1 y4)
-        (small x1 y4)
-        (mix-percentage p100 x1 y4)
-    )
-)
-
-(:action spawn_Bovine
-    :parameters ()
-    :precondition (and
-        (not (occupied x2 y3))
-        (not (occupied x3 y3))
-        (not (occupied x4 y3))
-        (not (occupied x2 y4))
-        (not (occupied x3 y4))
-        (not (occupied x4 y4))
-    )
-    :effect (and
-        (reagent-type bovine x3 y4)
-        (occupied x3 y4)
-        (small x3 y4)
-        (mix-percentage p100 x3 y3)
-    )
-)
-
-(:action spawn_Gelatin
-    :parameters ()
-    :precondition (and
+        (not (occupied x1 y1))
+        (not (occupied x2 y1))
+        (not (occupied x3 y1))
+        (not (occupied x1 y2))
+        (not (occupied x2 y2))
         (not (occupied x3 y2))
-        (not (occupied x3 y3))
-        (not (occupied x3 y4))
-        (not (occupied x4 y2))
-        (not (occupied x4 y3))
-        (not (occupied x4 y4))
     )
     :effect (and
-        (reagent-type gelatin x4 y3)
-        (occupied x4 y3)
-        (small x4 y3)
-        (mix-percentage p100 x4 y3)
+        (reagent-type beosynucleotide x2 y1)
+        (occupied x2 y1)
+        (small x2 y1)
+        (mix-percentage p100 x2 y1)
+    )
+)
+
+(:action spawn_AmpliTag
+    :parameters ()
+    :precondition (and
+        (not (occupied x6 y1))
+        (not (occupied x7 y1))
+        (not (occupied x8 y1))
+        (not (occupied x6 y2))
+        (not (occupied x7 y2))
+        (not (occupied x8 y2))
+    )
+    :effect (and
+        (reagent-type amplitag x7 y1)
+        (occupied x7 y1)
+        (small x7 y1)
+        (mix-percentage p100 x7 y1)
+    )
+)
+
+(:action spawn_LamdaDNA
+    :parameters ()
+    :precondition (and
+        (not (occupied x7 y1))
+        (not (occupied x7 y2))
+        (not (occupied x7 y3))
+        (not (occupied x8 y1))
+        (not (occupied x8 y2))
+        (not (occupied x8 y3))
+    )
+    :effect (and
+        (reagent-type lambdadna x8 y2)
+        (occupied x8 y2)
+        (small x8 y2)
+        (mix-percentage p100 x8 y2)
     )
 )
 
 (:action dispose
     :parameters (?r - reagent)
     :precondition (and 
-        (reagent-type ?r x3 y1)
+        (reagent-type ?r x8 y4)
     )
     :effect (and
-        (not (reagent-type ?r x3 y1))
-        (not (occupied x3 y1))
-        (not (small x3 y1))
-        (not (moved-west x3 y1))
-        (not (moved-east x3 y1))
-        (not (moved-north x3 y1))
-        (not (moved-south x3 y1))
-        (not (moved-once x3 y1))
-        (not (moved-twice x3 y1))
-        (not (moved-three-times x3 y1))
+        (not (reagent-type ?r x8 y4))
+        (not (occupied x8 y4))
+        (not (small x8 y4))
+        (not (moved-west x8 y4))
+        (not (moved-east x8 y4))
+        (not (moved-north x8 y4))
+        (not (moved-south x8 y4))
+        (not (moved-once x8 y4))
+        (not (moved-twice x8 y4))
+        (not (moved-three-times x8 y4))
         (forall (?p - percentage)
-            (not (mix-percentage ?p x3 y1))
+            (not (mix-percentage ?p x8 y4))
         )
     )
 )
@@ -153,6 +230,32 @@
         (forall (?p2 - percentage) (and
             (when (and 
                 (moved-north ?xo ?yo)
+                (moved-four-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-north ?xo ?yo))
+                (not (moved-four-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-north ?xo ?yt)
+                (moved-five-times ?xo ?yt)
+                (mix-percentage ?p2 ?xo ?yt)
+            )
+            )
+            (when (and
+                (moved-north ?xo ?yo)
+                (moved-three-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-north ?xo ?yo))
+                (not (moved-three-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-north ?xo ?yt)
+                (moved-four-times ?xo ?yt)
+                (mix-percentage ?p2 ?xo ?yt)
+            )
+            )
+            (when (and 
+                (moved-north ?xo ?yo)
                 (moved-twice ?xo ?yo)
                 (NEXTPERCENTAGE ?p1 ?p2)
             ) (and
@@ -167,6 +270,16 @@
         ))
         (when (and 
             (moved-north ?xo ?yo)
+            (moved-five-times ?xo ?yo)
+        ) (and
+            (not (moved-north ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
+            (not (mix-percentage ?p1 ?xo ?yo))
+            (mix-percentage ?p1 ?xo ?yt)
+        )
+        )
+        (when (and 
+            (moved-north ?xo ?yo)
             (moved-once ?xo ?yo)
         ) (and
             (not (moved-north ?xo ?yo))
@@ -178,26 +291,16 @@
         )
         )
         (when (and
-            (moved-north ?xo ?yo)
-            (moved-three-times ?xo ?yo)
-        ) (and
-            (not (moved-north ?xo ?yo))
-            (not (moved-three-times ?xo ?yo))
-            (not (mix-percentage ?p1 ?xo ?yo))
-            (moved-north ?xo ?yt)
-            (moved-once ?xo ?yt)
-            (mix-percentage ?p1 ?xo ?yt)
-        )
-        )
-        (when (and
             (not (moved-north ?xo ?yo))
         ) (and
-            (not (moved-north ?xo ?yo))
             (not (moved-east ?xo ?yo))
             (not (moved-west ?xo ?yo))
             (not (moved-south ?xo ?yo))
+            (not (moved-once ?xo ?yo))
             (not (moved-twice ?xo ?yo))
             (not (moved-three-times ?xo ?yo))
+            (not (moved-four-times ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
             (not (mix-percentage ?p1 ?xo ?yo))
             (moved-north ?xo ?yt)
             (moved-once ?xo ?yt)
@@ -236,7 +339,33 @@
             )
         )
         (forall (?p2 - percentage) (and
-            (when (and 
+            (when (and
+                (moved-south ?xo ?yo)
+                (moved-four-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-south ?xo ?yo))
+                (not (moved-four-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-south ?xo ?yt)
+                (moved-five-times ?xo ?yt)
+                (mix-percentage ?p2 ?xo ?yt)
+            )
+            )
+            (when (and
+                (moved-south ?xo ?yo)
+                (moved-three-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-south ?xo ?yo))
+                (not (moved-three-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-south ?xo ?yt)
+                (moved-four-times ?xo ?yt)
+                (mix-percentage ?p2 ?xo ?yt)
+            )
+            )
+            (when (and
                 (moved-south ?xo ?yo)
                 (moved-twice ?xo ?yo)
                 (NEXTPERCENTAGE ?p1 ?p2)
@@ -249,6 +378,15 @@
                 (mix-percentage ?p2 ?xo ?yt)
             )
             )
+        ))
+        (when (and 
+            (moved-south ?xo ?yo)
+            (moved-five-times ?xo ?yo)
+        ) (and
+            (not (moved-south ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
+            (not (mix-percentage ?p1 ?xo ?yo))
+            (mix-percentage ?p1 ?xo ?yt)
         )
         )
         (when (and 
@@ -264,26 +402,16 @@
         )
         )
         (when (and
-            (moved-south ?xo ?yo)
-            (moved-three-times ?xo ?yo)
-        ) (and
-            (not (moved-south ?xo ?yo))
-            (not (moved-three-times ?xo ?yo))
-            (not (mix-percentage ?p1 ?xo ?yo))
-            (moved-south ?xo ?yt)
-            (moved-once ?xo ?yt)
-            (mix-percentage ?p1 ?xo ?yt)
-        )
-        )
-        (when (and
             (not (moved-south ?xo ?yo))
         ) (and
-            (not (moved-north ?xo ?yo))
             (not (moved-east ?xo ?yo))
             (not (moved-west ?xo ?yo))
-            (not (moved-south ?xo ?yo))
+            (not (moved-north ?xo ?yo))
+            (not (moved-once ?xo ?yo))
             (not (moved-twice ?xo ?yo))
             (not (moved-three-times ?xo ?yo))
+            (not (moved-four-times ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
             (not (mix-percentage ?p1 ?xo ?yo))
             (moved-south ?xo ?yt)
             (moved-once ?xo ?yt)
@@ -294,91 +422,6 @@
         (reagent-type ?r ?xo ?yt)
         (not (occupied ?xo ?yo))
         (occupied ?xo ?yt)
-    )
-)
-
-(:action move_east
-    :parameters (?r - reagent ?xo ?xt - xcoord ?yo - ycoord ?p1 - percentage)
-    :precondition (and
-        (reagent-type ?r ?xo ?yo)
-        (ISEAST ?xt ?xo)
-        (mix-percentage ?p1 ?xo ?yo)
-        (not (blocked ?xt ?yo))
-        (forall (?x - xcoord)
-          (forall (?y - ycoord)
-            (imply (and
-                (not (and (= ?x ?xo) (= ?y ?yo)))
-                (VICINITY ?x ?y ?xt ?yo)
-            )
-                (not (occupied ?x ?y))
-            )
-          )
-        )
-    )
-    :effect (and
-        (when (small ?xo ?yo) (and
-            (small ?xt ?yo)
-            (not (small ?xo ?yo))
-            )
-        )
-        (forall (?p2 - percentage) (and
-            (when (and 
-                (moved-east ?xo ?yo)
-                (moved-twice ?xo ?yo)
-                (NEXTPERCENTAGE ?p1 ?p2)
-            ) (and
-                (not (moved-east ?xo ?yo))
-                (not (moved-twice ?xo ?yo))
-                (not (mix-percentage ?p1 ?xo ?yo))
-                (moved-east ?xt ?yo)
-                (moved-three-times ?xt ?yo)
-                (mix-percentage ?p2 ?xt ?yo)
-            )
-            )
-        ))
-        (when (and 
-            (moved-east ?xo ?yo)
-            (moved-once ?xo ?yo)
-        ) (and
-            (not (moved-east ?xo ?yo))
-            (not (moved-once ?xo ?yo))
-            (not (mix-percentage ?p1 ?xo ?yo))
-            (moved-east ?xt ?yo)
-            (moved-twice ?xt ?yo)
-            (mix-percentage ?p1 ?xt ?yo)
-        )
-        )
-        (when (and
-            (moved-east ?xo ?yo)
-            (moved-three-times ?xo ?yo)
-        ) (and
-            (not (moved-east ?xo ?yo))
-            (not (moved-three-times ?xo ?yo))
-            (not (mix-percentage ?p1 ?xo ?yo))
-            (moved-east ?xt ?yo)
-            (moved-once ?xt ?yo)
-            (mix-percentage ?p1 ?xt ?yo)
-        )
-        )
-        (when (and
-            (not (moved-east ?xo ?yo))
-        ) (and
-            (not (moved-north ?xo ?yo))
-            (not (moved-west ?xo ?yo))
-            (not (moved-east ?xo ?yo))
-            (not (moved-south ?xo ?yo))
-            (not (moved-twice ?xo ?yo))
-            (not (moved-three-times ?xo ?yo))
-            (not (mix-percentage ?p1 ?xo ?yo))
-            (moved-east ?xt ?yo)
-            (moved-once ?xt ?yo)
-            (mix-percentage ?p1 ?xt ?yo)
-        )
-        )
-        (not (reagent-type ?r ?xo ?yo))
-        (reagent-type ?r ?xt ?yo)
-        (not (occupied ?xo ?yo))
-        (occupied ?xt ?yo)
     )
 )
 
@@ -407,8 +450,34 @@
             )
         )
         (forall (?p2 - percentage) (and
-            (when (and 
+            (when (and
                 (moved-west ?xo ?yo)
+                (moved-four-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-west ?xo ?yo))
+                (not (moved-four-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-west ?xt ?yo)
+                (moved-five-times ?xt ?yo)
+                (mix-percentage ?p2 ?xt ?yo)
+            )
+            )
+            (when (and
+                (moved-west ?xo ?yo)
+                (moved-three-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-west ?xo ?yo))
+                (not (moved-three-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-west ?xt ?yo)
+                (moved-four-times ?xt ?yo)
+                (mix-percentage ?p2 ?xt ?yo)
+            )
+            )
+            (when (and
+                (moved-west ?xo ?yo) 
                 (moved-twice ?xo ?yo)
                 (NEXTPERCENTAGE ?p1 ?p2)
             ) (and
@@ -421,7 +490,17 @@
             )
             )
         ))
-        (when (and 
+        (when (and
+            (moved-west ?xo ?yo)
+            (moved-five-times ?xo ?yo)
+        ) (and
+            (not (moved-west ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
+            (not (mix-percentage ?p1 ?xo ?yo))
+            (mix-percentage ?p1 ?xt ?yo)
+        )
+        )
+        (when (and
             (moved-west ?xo ?yo)
             (moved-once ?xo ?yo)
         ) (and
@@ -434,28 +513,129 @@
         )
         )
         (when (and
-            (moved-west ?xo ?yo)
-            (moved-three-times ?xo ?yo)
-        ) (and
             (not (moved-west ?xo ?yo))
+        ) (and
+            (not (moved-east ?xo ?yo))
+            (not (moved-north ?xo ?yo))
+            (not (moved-south ?xo ?yo))
+            (not (moved-once ?xo ?yo))
+            (not (moved-twice ?xo ?yo))
             (not (moved-three-times ?xo ?yo))
+            (not (moved-four-times ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
             (not (mix-percentage ?p1 ?xo ?yo))
             (moved-west ?xt ?yo)
             (moved-once ?xt ?yo)
             (mix-percentage ?p1 ?xt ?yo)
         )
         )
+        (not (reagent-type ?r ?xo ?yo))
+        (reagent-type ?r ?xt ?yo)
+        (not (occupied ?xo ?yo))
+        (occupied ?xt ?yo)
+    )
+)
+
+(:action move_east
+    :parameters (?r - reagent ?xo ?xt - xcoord ?yo - ycoord ?p1 - percentage)
+    :precondition (and
+        (reagent-type ?r ?xo ?yo)
+        (ISEAST ?xt ?xo)
+        (mix-percentage ?p1 ?xo ?yo)
+        (not (blocked ?xt ?yo))
+        (forall (?x - xcoord)
+          (forall (?y - ycoord)
+            (imply (and
+                (not (and (= ?x ?xo) (= ?y ?yo)))
+                (VICINITY ?x ?y ?xt ?yo)
+            )
+                (not (occupied ?x ?y))
+            )
+          )
+        )
+    )
+    :effect (and
+        (when (small ?xo ?yo) (and
+            (small ?xt ?yo)
+            (not (small ?xo ?yo))
+            )
+        )
+        (forall (?p2 - percentage) (and
+            (when (and
+                (moved-east ?xo ?yo)
+                (moved-four-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-east ?xo ?yo))
+                (not (moved-four-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-east ?xt ?yo)
+                (moved-five-times ?xt ?yo)
+                (mix-percentage ?p2 ?xt ?yo)
+            )
+            )
+            (when (and
+                (moved-east ?xo ?yo)
+                (moved-three-times ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-east ?xo ?yo))
+                (not (moved-three-times ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-east ?xt ?yo)
+                (moved-four-times ?xt ?yo)
+                (mix-percentage ?p2 ?xt ?yo)
+            )
+            )
+            (when (and
+                (moved-east ?xo ?yo) 
+                (moved-twice ?xo ?yo)
+                (NEXTPERCENTAGE ?p1 ?p2)
+            ) (and
+                (not (moved-east ?xo ?yo))
+                (not (moved-twice ?xo ?yo))
+                (not (mix-percentage ?p1 ?xo ?yo))
+                (moved-east ?xt ?yo)
+                (moved-three-times ?xt ?yo)
+                (mix-percentage ?p2 ?xt ?yo)
+            )
+            )
+        ))
         (when (and
-            (not (moved-west ?xo ?yo))
+            (moved-east ?xo ?yo)
+            (moved-five-times ?xo ?yo)
         ) (and
-            (not (moved-north ?xo ?yo))
             (not (moved-east ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
+            (not (mix-percentage ?p1 ?xo ?yo))
+            (mix-percentage ?p1 ?xt ?yo)
+        )
+        )
+        (when (and
+            (moved-east ?xo ?yo)
+            (moved-once ?xo ?yo)
+        ) (and
+            (not (moved-east ?xo ?yo))
+            (not (moved-once ?xo ?yo))
+            (not (mix-percentage ?p1 ?xo ?yo))
+            (moved-east ?xt ?yo)
+            (moved-twice ?xt ?yo)
+            (mix-percentage ?p1 ?xt ?yo)
+        )
+        )
+        (when (and
+            (not (moved-east ?xo ?yo))
+        ) (and
             (not (moved-west ?xo ?yo))
+            (not (moved-north ?xo ?yo))
             (not (moved-south ?xo ?yo))
+            (not (moved-once ?xo ?yo))
             (not (moved-twice ?xo ?yo))
             (not (moved-three-times ?xo ?yo))
+            (not (moved-four-times ?xo ?yo))
+            (not (moved-five-times ?xo ?yo))
             (not (mix-percentage ?p1 ?xo ?yo))
-            (moved-west ?xt ?yo)
+            (moved-east ?xt ?yo)
             (moved-once ?xt ?yo)
             (mix-percentage ?p1 ?xt ?yo)
         )
@@ -642,5 +822,6 @@
         (occupied ?xo ?yb)
     )
 )
+
 
 )

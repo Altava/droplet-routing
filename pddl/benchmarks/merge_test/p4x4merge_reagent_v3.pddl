@@ -1,17 +1,14 @@
 (define (problem p8x8d8n) (:domain p8x8d8n-domain)
 
 (:objects
-    hcl kcl bovine gelatin firstmix1 firstmix2 secondmix1 - reagent
+    kcl - reagent
     xcoord ycoord - coordinate
     x1 x2 x3 x4 - xcoord
     y1 y2 y3 y4 - ycoord
-    p0 p20 p40 p60 p80 p100 - percentage
+    p0 p100 - percentage
 )
 
 (:init
-    (MIX hcl kcl firstmix1)
-    (MIX bovine gelatin firstmix2)
-    (MIX firstmix1 firstmix2 secondmix1)
     (ISEAST x2 x1)
     (ISEAST x3 x2)
     (ISEAST x4 x3)
@@ -24,11 +21,7 @@
     (ISSOUTH y1 y2)
     (ISSOUTH y2 y3)
     (ISSOUTH y3 y4)
-    (NEXTPERCENTAGE p0 p20)
-    (NEXTPERCENTAGE p20 p40)
-    (NEXTPERCENTAGE p40 p60)
-    (NEXTPERCENTAGE p60 p80)
-    (NEXTPERCENTAGE p80 p100)
+    (NEXTPERCENTAGE p0 p100)
     (NEXTPERCENTAGE p100 p100)
     (NEIGHBOUR x1 y1 x1 y2)
     (NEIGHBOUR x1 y1 x2 y1)
@@ -165,7 +158,7 @@
 )
 
 (:goal (and
-    (mix-percentage p100 x4 y2)
-    (reagent-type firstmix1 x4 y2)
+    (small x1 y1)
+    (reagent-type kcl x1 y1)
 ))
 )
