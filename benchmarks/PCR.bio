@@ -4,15 +4,41 @@
 # An efficient module-less synthesis approach
 # for Digital Microfluidic Biochips
 
-# 11 = Tris HCL
-# 12 = KCL
-# 13 = Bovine Serum
-# 14 = Gelatin
-# 15 = Primer
-# 16 = Beosynucleotide
-# 17 = AmpliTag
-# 18 = LamdaDNA
-# 1-7 = Mixture 1-7
+fluids
+11 TrisHCL
+12 KCL
+13 BovineSerum
+14 Gelatin
+15 Primer
+16 Beosynucleotide
+17 AmpliTag
+18 LamdaDNA
+1 Mixture1_1
+2 Mixture1_2
+3 Mixture1_3
+4 Mixture1_4
+5 Mixture2_1
+6 Mixture2_1
+7 Mixture3
+end
+
+droplets
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+17 17
+18 18
+end
 
 grid
 (1,1) (8,8)
@@ -28,19 +54,21 @@ mixings
 5 + 6 = 7
 end
 
-origins
-11 (1,7)
-12 (2,8)
-13 (7,8)
-14 (8,7)
-15 (1,2)
-16 (2,1)
-17 (7,1)
-18 (8,2)
+dispensers
+11 (1,7) W
+12 (2,8) N
+13 (7,8) N
+14 (8,7) E
+15 (1,2) W
+16 (2,1) S
+17 (7,1) S
+18 (8,2) E
 end
 
-# w marks the waste outlet
-targets
-7 (8,1)
-w (8,4)
+detectors
+(8,1) 1 7
+end
+
+sinks
+(8,4) E
 end
