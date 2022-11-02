@@ -14,6 +14,7 @@ def validate_file(f):
         raise argparse.ArgumentTypeError("{0} does not exist".format(f))
     return f
 
+# function to parse files using the BioGram grammar
 def parseFile(file):
     f = open(file, "r")
     content = f.read()
@@ -21,13 +22,14 @@ def parseFile(file):
     # for i, elem in enumerate(t):
     #     print(i, elem)
 
+    # search for "grid", parse into grid size
     x, y = re.search("(?s)grid(.*)end", content).group(1).split("end")[0].split()[1].split(",")
     x = int("".join(filter(str.isdigit, x)))
     y = int("".join(filter(str.isdigit, y)))
     print("size:", x, "by", y)
 
+    # search for "blockages", parse into list of blocked fields
     block = []
-
     blocksearch = re.search("(?s)blockages(.*)end", content)
     if blocksearch:
         blockages = list(filter(None, blocksearch.group(1).split("end")[0].split("\n")))
@@ -35,9 +37,9 @@ def parseFile(file):
             block.append(list(filter(None, re.split("[(), ]", b))))
         print("blockages:", block)
 
+    # search for "nets", parse into lists of start and goal positions for each droplet
     start = []
     goal = []
-
     netsearch = re.search("(?s)nets(.*)end", content)
     if netsearch:
         nets = list(filter(None, netsearch.group(1).split("end")[0].split("\n")))
@@ -60,8 +62,8 @@ def parseFile(file):
         print("start positions:", start)
         print("goal positions:", goal)
     
+    # search for "mixings", parse into list of possible mixtures
     mix = []
-
     mixsearch = re.search("(?s)mixings(.*)end", content)
     if mixsearch:
         global mixing
@@ -71,23 +73,37 @@ def parseFile(file):
             elem = re.search("(\d+) \+ (\d+) = (\d+)", mx).group(1, 2, 3)
             mix.append(elem)
 
-    originssearch = re.search("(?s)origins(.*)end", content)
-    if originssearch:
-        origins = list(filter(None, originssearch.group(1).split("end")[0].split("\n")))
-        for og in origins:
-            elem = re.search("(\d+) \((\d+),(\d+)\)", og).group(1, 2, 3)
+    # search for "dispensers", parse into list of dispenser locations
+    dispenserssearch = re.search("(?s)dispensers(.*)end", content)
+    if dispenserssearch:
+        dispensers = list(filter(None, dispenserssearch.group(1).split("end")[0].split("\n")))
+        for dsp in dispensers:
+            elem = re.search("(\d+) \((\d+),(\d+)\)", dsp).group(1, 2, 3)
             start.append(elem[0] + " x" + elem[1] + " y" + elem[2])
 
-    targetsearch = re.search("(?s)targets(.*)end", content)
-    if targetsearch:
-        targets = list(filter(None, targetsearch.group(1).split("end")[0].split("\n")))
-        for tg in targets:
-            elem = re.search("(.+) \((\d+),(\d+)\)", tg).group(1, 2, 3)
+    # search for "sinks", parse into list of sink locations
+    sink = []
+    sinkssearch = re.search("(?s)sinks(.*)end", content)
+    if sinkssearch:
+        sinks = list(filter(None, sinkssearch.group(1).split("end")[0].split("\n")))
+        for snk in sinks:
+            elem = re.search("\((\d+),(\d+)\)", snk).group(1, 2)
             if elem[0].isdigit():
-                goal.append(elem[0] + " x" + elem[1] + " y" + elem[2])
+                sink.append("x" + elem[0] + " y" + elem[1])
+                
+    # search for "detectors", parse into list of detector locations
+    detectorssearch = re.search("(?s)detectors(.*)end", content)
+    if detectorssearch:
+        detectors = list(filter(None, detectorssearch.group(1).split("end")[0].split("\n")))
+        for dtc in detectors:
+            elem = re.search("\((\d+),(\d+)\) \d+ (\d+)", dtc).group(1, 2, 3)
+            if elem[0].isdigit():
+                goal.append(elem[2] + " x" + elem[0] + " y" + elem[1])
 
-    return x, y, start, goal, block, mix
 
+    return x, y, start, goal, block, mix, sink
+
+# helper function for sequential coordinate calculation
 def sc(x, y, xmax):
     return x + (y-1) * xmax
 
