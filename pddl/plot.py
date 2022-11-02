@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import os
 import re
@@ -18,13 +17,46 @@ def compute_log_score(success, value, lower_bound, upper_bound):
     best_raw_score = math.log(lower_bound) - math.log(upper_bound)
     return raw_score / best_raw_score
 
+# function to parse files using the BioGram grammar
+def parseFile(file):
+    f = open(file, "r")
+    content = f.read()
+    
+    # search for "nets", parse into list of coordinates
+    min_plan_length = 0
+    netsearch = re.search("(?s)nets(.*)end", content)
+    nets = list(filter(None, netsearch.group(1).split("end")[0].split("\n")))
+    for net in nets:
+        pos = re.search("\d+ \((\d+),(\d+)\) -> \((\d+),(\d+)\)", net).group(1, 2, 3, 4)
+        min_plan_length += abs(int(pos[0]) - int(pos[2]))
+        min_plan_length += abs(int(pos[1]) - int(pos[3]))
+
+    # print("current min_plan_length:", min_plan_length)
+    
+    return min_plan_length
+
 parentname = os.path.dirname(__file__)
 dictionary_classical = open(os.path.join(parentname, 'properties_classical'), 'r')
 dictionary_durative = open(os.path.join(parentname, 'properties_durative'), 'r')
+dictionary_classical_anytime = open(os.path.join(parentname, 'properties_classical_anytime'), 'r')
+dictionary_durative_anytime = open(os.path.join(parentname, 'properties_durative_anytime'), 'r')
 data_classical = pd.read_json(dictionary_classical)
 data_durative = pd.read_json(dictionary_durative)
+data_classical_anytime = pd.read_json(dictionary_classical_anytime)
+data_durative_anytime = pd.read_json(dictionary_durative_anytime)
 raw_classical = data_classical.transpose()
 raw_durative = data_durative.transpose()
+raw_classical_anytime = data_classical_anytime.transpose()
+raw_durative_anytime = data_durative_anytime.transpose()
+print(raw_classical_anytime)
+print(raw_durative_anytime)
+# raw_classical_anytime['plans'] = raw_classical_anytime.apply(lambda row: len(row.plan_length_over_time), axis=1)
+# raw_classical_anytime = raw_classical_anytime.drop(raw_classical_anytime[raw_classical_anytime.plans > 0].index)
+# print(raw_classical_anytime)
+# print(raw_durative_anytime)
+# raw_durative_anytime['plans'] = raw_durative_anytime.apply(lambda row: len(row.plan_length_over_time), axis=1)
+# raw_durative_anytime = raw_durative_anytime.drop(raw_durative_anytime[raw_durative_anytime.plans > 0].index)
+# print(raw_durative_anytime)
 
 raw_classical['size_x'] = raw_classical.apply(lambda row: re.search("^p(\d+)x*", row.problem).group(1), axis=1)
 raw_classical['size_y'] = raw_classical.apply(lambda row: re.search("^p\d+x(\d+)*", row.problem).group(1), axis=1)
@@ -80,6 +112,127 @@ drop = [drop_classical, drop_durative]
 size = [size_classical, size_durative]
 bloc = [bloc_classical, bloc_durative]
 
+# -----V----V-----V-- Survival Plots for Anytime Search --V----V----V---- #
+
+raw_classical_anytime['min_plan_length'] = raw_classical_anytime.apply(lambda row: 0, axis=1)
+raw_durative_anytime['min_plan_length'] = raw_durative_anytime.apply(lambda row: 0, axis=1)
+min_solutions = []
+
+dir = "/home/altava/droplet-routing/benchmarks"
+for dirpath, dirs, files in os.walk(dir):
+    print(dirpath)
+    for fl in files:
+        if re.search("^\d+.bio", fl):
+            min_plan_length = parseFile(os.path.join(dirpath, fl))
+            problemname = dirpath.split("/")[-1] + "n" + fl
+            problemname = problemname.replace("bm", "p")
+            problemname = problemname.replace("bio", "pddl")
+            raw_classical_anytime.loc[raw_classical_anytime['problem'] == problemname, ['min_plan_length']] = min_plan_length
+            raw_durative_anytime.loc[raw_durative_anytime['problem'] == problemname, ['min_plan_length']] = min_plan_length
+
+cgca = raw_classical_anytime.query('domain == "classical_grounded_coords"')
+cgsa = raw_classical_anytime.query('domain == "classical_grounded_sequential"')
+clca = raw_classical_anytime.query('domain == "classical_lifted_coords"')
+clsa = raw_classical_anytime.query('domain == "classical_lifted_sequential"')
+dgca = raw_durative_anytime.query('domain == "durative_grounded_coords"')
+dgsa = raw_durative_anytime.query('domain == "durative_grounded_sequential"')
+dlca = raw_durative_anytime.query('domain == "durative_lifted_coords"')
+dlsa = raw_durative_anytime.query('domain == "durative_lifted_sequential"')
+configurations = [cgca, cgsa, clca, clsa, dgca, dgsa, dlca, dlsa]
+for cfg in configurations:
+    scores = []
+    for index, row in cfg.iterrows():
+        i = 0
+        for t in row['times_over_time']:
+            if len(row['plan_length_over_time']) <= i:
+                i = len(row['plan_length_over_time']) - 1
+            plan_length = row['plan_length_over_time'][i]
+            if isinstance(t, list):
+                t = t[0]
+            score = compute_log_score(not math.isnan(t), plan_length, row['min_plan_length'], row['min_plan_length'] * 4)
+            scores.append((t, score))
+            i += 1
+
+    scores.sort(key=lambda x: x[0])
+    timesteps = []
+    average_score = []
+    to_average = []
+    for j in range(-25, 50):
+        timesteps.append(math.exp(j/10.0))
+        if scores:
+            while(scores[0][0] <= math.exp(j/10.0)):
+                to_average.append(scores.pop(0)[1])
+                if not scores:
+                    break
+        if len(to_average) == 0:
+            average_score.append(nan)
+        else:
+            average_score.append(sum(to_average) / len(to_average))
+
+    plt.plot(timesteps, average_score, label=cfg.iloc[0]['domain'])
+plt.legend(loc='lower left')
+plt.title("Accumulated Average Plan Length Score")
+plt.xscale('log')
+plt.xlabel('time in seconds')
+plt.ylabel('plan length score')
+plt.show()
+            
+# -----V----V-----V-- Survival Plots --V----V----V---- #
+
+# problem_types = ["p15x15d7b3", "p15x15d7b6", "p9x9d5b3", "p9x9d9b3"]
+# fig, ax = plt.subplots(2, 2)
+# for i in range(0,4):
+#     p15_c = raw_classical.query('problem_type == "%s"' % problem_types[i])
+#     p15_d = raw_durative.query('problem_type == "%s"' % problem_types[i])
+#     p15_cgc = p15_c.query('domain == "classical_grounded_coords"')
+#     p15_cgs = p15_c.query('domain == "classical_grounded_sequential"')
+#     p15_clc = p15_c.query('domain == "classical_lifted_coords"')
+#     p15_cls = p15_c.query('domain == "classical_lifted_sequential"')
+#     p15_dgc = p15_d.query('domain == "durative_grounded_coords"')
+#     p15_dgs = p15_d.query('domain == "durative_grounded_sequential"')
+#     p15_dlc = p15_d.query('domain == "durative_lifted_coords"')
+#     p15_dls = p15_d.query('domain == "durative_lifted_sequential"')
+#     timesteps = []
+#     cgc = []
+#     cgs = []
+#     clc = []
+#     cls = []
+#     dgc = []
+#     dgs = []
+#     dlc = []
+#     dls = []
+#     for j in range(-25, 50):
+#         timesteps.append(math.exp(j/10.0))
+#         cgc.append((len(p15_cgc[p15_cgc['search_time'] < math.exp(j/10.0)]))/len(p15_cgc))
+#         cgs.append((len(p15_cgs[p15_cgs['search_time'] < math.exp(j/10.0)]))/len(p15_cgs))
+#         clc.append((len(p15_clc[p15_clc['search_time'] < math.exp(j/10.0)]))/len(p15_clc))
+#         cls.append((len(p15_cls[p15_cls['search_time'] < math.exp(j/10.0)]))/len(p15_cls))
+#         dgc.append((len(p15_dgc[p15_dgc['search_time'] < math.exp(j/10.0)]))/len(p15_dgc))
+#         dgs.append((len(p15_dgs[p15_dgs['search_time'] < math.exp(j/10.0)]))/len(p15_dgs))
+#         dlc.append((len(p15_dlc[p15_dlc['search_time'] < math.exp(j/10.0)]))/len(p15_dlc))
+#         dls.append((len(p15_dls[p15_dls['search_time'] < math.exp(j/10.0)]))/len(p15_dls))
+
+
+#     ax[int(i/2), i%2].plot(timesteps, cgc, label='classical grounded coordinates')
+#     ax[int(i/2), i%2].plot(timesteps, cgs, label='classical grounded sequential')
+#     ax[int(i/2), i%2].plot(timesteps, clc, label='classical lifted coordinates')
+#     ax[int(i/2), i%2].plot(timesteps, cls, label='classical lifted sequential')
+#     ax[int(i/2), i%2].plot(timesteps, dgc, label='durative grounded coordinates')
+#     ax[int(i/2), i%2].plot(timesteps, dgs, label='durative grounded sequential')
+#     ax[int(i/2), i%2].plot(timesteps, dlc, label='durative lifted coordinates')
+#     ax[int(i/2), i%2].plot(timesteps, dls, label='durative lifted sequential')
+#     ax[int(i/2), i%2].set_title(problem_types[i])
+#     # ax[int(i/2), i%2].xscale('log')
+# for a in ax.flat:
+#     a.set_xscale('log')
+#     a.set(xlabel='time in seconds')
+#     a.set(ylabel='percentage of instances that found a solution')
+#     a.label_outer()
+# ax[1, 0].legend(loc='lower right')
+# plt.show()
+
+# ----V----V----V-- Basic Blots --V----V----V---- #
+
 # clc = data.filter(regex='^lama-first-classical_lifted_coords', axis=1)
 # # print(clc)
 
@@ -89,33 +242,33 @@ bloc = [bloc_classical, bloc_durative]
 # yAxis = [cgc['search_time']]
 # plt.grid(True)
 
-plot_classical = True
-plot_durative = False
-plots = [["droplets", "score_search_time", drop], ["size_x", "score_search_time", size], ["blockages", "score_search_time", bloc], 
-        ["droplets", "plan_length", drop], ["size_x", "plan_length", size], ["blockages", "plan_length", bloc], 
-        ["droplets", "search_score_per_plan_length", drop], ["size_x", "search_score_per_plan_length", size], ["blockages", "search_score_per_plan_length", bloc]]
-fig, axes = plt.subplots(int(len(plots) / 3), 3)
-i_p = 0
+# plot_classical = True
+# plot_durative = False
+# plots = [["droplets", "score_search_time", drop], ["size_x", "score_search_time", size], ["blockages", "score_search_time", bloc], 
+#         ["droplets", "plan_length", drop], ["size_x", "plan_length", size], ["blockages", "plan_length", bloc], 
+#         ["droplets", "search_score_per_plan_length", drop], ["size_x", "search_score_per_plan_length", size], ["blockages", "search_score_per_plan_length", bloc]]
+# fig, axes = plt.subplots(int(len(plots) / 3), 3)
+# i_p = 0
 
-for p in plots:
-    ax = axes[int(i_p / 3), i_p % 3]
-    if plot_classical:
-        p[2][0].query('domain == "classical_lifted_coords"').plot(x=p[0], y=p[1], label="Classical Lifted Coords", ax=ax, legend=0)
-        p[2][0].query('domain == "classical_lifted_sequential"').plot(x=p[0], y=p[1], label="Classical Lifted Sequential", ax=ax, legend=0)
-        p[2][0].query('domain == "classical_grounded_coords"').plot(x=p[0], y=p[1], label="Classical Grounded Coords", ax=ax, legend=0)
-        p[2][0].query('domain == "classical_grounded_sequential"').plot(x=p[0], y=p[1], label="Classical Grounded Sequential", ax=ax, legend=0)
-    if plot_durative:
-        p[2][1].query('domain == "durative_lifted_coords"').plot(x=p[0], y=p[1], label="Durative Lifted Coords", ax=ax, legend=0)
-        p[2][1].query('domain == "durative_lifted_sequential"').plot(x=p[0], y=p[1], label="Durative Lifted Sequential", ax=ax, legend=0)
-        p[2][1].query('domain == "durative_grounded_coords"').plot(x=p[0], y=p[1], label="Durative Grounded Coords", ax=ax, legend=0)
-        p[2][1].query('domain == "durative_grounded_sequential"').plot(x=p[0], y=p[1], label="Durative Grounded Sequential", ax=ax, legend=0)
-    ax.set_xlabel(p[0])
-    ax.set_ylabel(p[1])
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    handles, labels = ax.get_legend_handles_labels()
-    fig.subplots_adjust(bottom=0.17)
-    fig.legend(handles, labels, loc='lower right')
-    i_p += 1
+# for p in plots:
+#     ax = axes[int(i_p / 3), i_p % 3]
+#     if plot_classical:
+#         p[2][0].query('domain == "classical_lifted_coords"').plot(x=p[0], y=p[1], label="Classical Lifted Coords", ax=ax, legend=0)
+#         p[2][0].query('domain == "classical_lifted_sequential"').plot(x=p[0], y=p[1], label="Classical Lifted Sequential", ax=ax, legend=0)
+#         p[2][0].query('domain == "classical_grounded_coords"').plot(x=p[0], y=p[1], label="Classical Grounded Coords", ax=ax, legend=0)
+#         p[2][0].query('domain == "classical_grounded_sequential"').plot(x=p[0], y=p[1], label="Classical Grounded Sequential", ax=ax, legend=0)
+#     if plot_durative:
+#         p[2][1].query('domain == "durative_lifted_coords"').plot(x=p[0], y=p[1], label="Durative Lifted Coords", ax=ax, legend=0)
+#         p[2][1].query('domain == "durative_lifted_sequential"').plot(x=p[0], y=p[1], label="Durative Lifted Sequential", ax=ax, legend=0)
+#         p[2][1].query('domain == "durative_grounded_coords"').plot(x=p[0], y=p[1], label="Durative Grounded Coords", ax=ax, legend=0)
+#         p[2][1].query('domain == "durative_grounded_sequential"').plot(x=p[0], y=p[1], label="Durative Grounded Sequential", ax=ax, legend=0)
+#     ax.set_xlabel(p[0])
+#     ax.set_ylabel(p[1])
+#     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#     handles, labels = ax.get_legend_handles_labels()
+#     fig.subplots_adjust(bottom=0.17)
+#     fig.legend(handles, labels, loc='lower right')
+#     i_p += 1
 
 # Graph for different sizes
 # ax_s = size_classical.query('domain == "classical_lifted_coords"').plot(x="size_x", y="score_search_time", label="Classical Lifted Coords")
@@ -134,4 +287,4 @@ for p in plots:
 
 # plt.plot(xAxis,yAxis, color='maroon', marker='o')
 
-plt.show()
+# plt.show()
