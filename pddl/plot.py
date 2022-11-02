@@ -1,3 +1,4 @@
+from math import nan
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
