@@ -13,13 +13,13 @@ fluids
 16 Beosynucleotide
 17 AmpliTag
 18 LamdaDNA
-1 Mixture1_1
-2 Mixture1_2
-3 Mixture1_3
-4 Mixture1_4
-5 Mixture2_1
-6 Mixture2_1
-7 Mixture3
+1 MixtureAA
+2 MixtureAB
+3 MixtureAC
+4 MixtureAD
+5 MixtureBA
+6 MixtureBB
+7 MixtureC
 end
 
 droplets
@@ -44,15 +44,15 @@ grid
 (1,1) (8,8)
 end
 
-mixings
-11 + 12 = 1
-13 + 14 = 2
-14 + 16 = 3
-17 + 18 = 4
-1 + 2 = 5
-3 + 4 = 6
-5 + 6 = 7
-end
+# mixings
+# 11 + 12 = 1
+# 13 + 14 = 2
+# 14 + 16 = 3
+# 17 + 18 = 4
+# 1 + 2 = 5
+# 3 + 4 = 6
+# 5 + 6 = 7
+# end
 
 dispensers
 11 (1,7) W
@@ -65,9 +65,9 @@ dispensers
 18 (8,2) E
 end
 
-detectors
-(8,1) 1 7
-end
+# detectors
+# (8,1)
+# end
 
 sinks
 (8,4) E
