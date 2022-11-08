@@ -1,4 +1,4 @@
-(define (domain p8x8d8n-domain)
+(define (domain p7merge_no_module-domain)
 
 (:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions :universal-preconditions)
 

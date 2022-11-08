@@ -1,4 +1,4 @@
-(define (domain p8x8d8n-domain)
+(define (domain p6merge_no_module-domain)
 
 (:requirements :strips :typing :conditional-effects :negative-preconditions :disjunctive-preconditions :universal-preconditions)
 
@@ -7,7 +7,7 @@
     xcoord ycoord - coordinate
     x1 x2 x3 x4 x5 x6 x7 x8 - xcoord
     y1 y2 y3 y4 y5 y6 y7 y8 - ycoord
-    hcl kcl bovine gelatin primer beosynucleotide amplitag lambdadna - reagent
+    primer beosynucleotide amplitag lambdadna - reagent
     p0 p5 p10 p15 p20 p25 p30 p35 p40 p45 p50 p55 p60 p65 p70 p75 p80 p85 p90 p95 p100 - percentage
 )
 
@@ -33,78 +33,6 @@
     (ISWEST ?x1 ?x2 - xcoord)
     (ISNORTH ?y1 ?y2 - ycoord)
     (ISSOUTH ?y1 ?y2 - ycoord)
-)
-
-(:action spawn_HCL
-    :parameters ()
-    :precondition (and
-        (not (occupied x1 y6))
-        (not (occupied x1 y7))
-        (not (occupied x1 y8))
-        (not (occupied x2 y6))
-        (not (occupied x2 y7))
-        (not (occupied x2 y8))
-    )
-    :effect (and
-        (reagent-type hcl x1 y7)
-        (occupied x1 y7)
-        (small x1 y7)
-        (mix-percentage p100 x1 y7)
-    )
-)
-
-(:action spawn_KCL
-    :parameters ()
-    :precondition (and
-        (not (occupied x1 y7))
-        (not (occupied x2 y7))
-        (not (occupied x3 y7))
-        (not (occupied x1 y8))
-        (not (occupied x2 y8))
-        (not (occupied x3 y8))
-    )
-    :effect (and
-        (reagent-type kcl x2 y8)
-        (occupied x2 y8)
-        (small x2 y8)
-        (mix-percentage p100 x2 y8)
-    )
-)
-
-(:action spawn_Bovine
-    :parameters ()
-    :precondition (and
-        (not (occupied x6 y7))
-        (not (occupied x7 y7))
-        (not (occupied x8 y7))
-        (not (occupied x6 y8))
-        (not (occupied x7 y8))
-        (not (occupied x8 y8))
-    )
-    :effect (and
-        (reagent-type bovine x7 y8)
-        (occupied x7 y8)
-        (small x7 y8)
-        (mix-percentage p100 x7 y8)
-    )
-)
-
-(:action spawn_Gelatin
-    :parameters ()
-    :precondition (and
-        (not (occupied x7 y6))
-        (not (occupied x7 y7))
-        (not (occupied x7 y8))
-        (not (occupied x8 y6))
-        (not (occupied x8 y7))
-        (not (occupied x8 y8))
-    )
-    :effect (and
-        (reagent-type gelatin x8 y7)
-        (occupied x8 y7)
-        (small x8 y7)
-        (mix-percentage p100 x8 y7)
-    )
 )
 
 (:action spawn_Primer
