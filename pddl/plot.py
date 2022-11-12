@@ -36,6 +36,9 @@ def parseFile(file):
     
     return min_plan_length
 
+def getFirst(list):
+    return [item[0] for item in list]
+
 parentname = os.path.dirname(__file__)
 dictionary_classical = open(os.path.join(parentname, 'properties_classical'), 'r')
 dictionary_durative = open(os.path.join(parentname, 'properties_durative'), 'r')
@@ -49,8 +52,8 @@ raw_classical = data_classical.transpose()
 raw_durative = data_durative.transpose()
 raw_classical_anytime = data_classical_anytime.transpose()
 raw_durative_anytime = data_durative_anytime.transpose()
-print(raw_classical_anytime)
-print(raw_durative_anytime)
+# print(raw_classical_anytime)
+# print(raw_durative_anytime)
 # raw_classical_anytime['plans'] = raw_classical_anytime.apply(lambda row: len(row.plan_length_over_time), axis=1)
 # raw_classical_anytime = raw_classical_anytime.drop(raw_classical_anytime[raw_classical_anytime.plans > 0].index)
 # print(raw_classical_anytime)
@@ -113,70 +116,100 @@ drop = [drop_classical, drop_durative]
 size = [size_classical, size_durative]
 bloc = [bloc_classical, bloc_durative]
 
-# -----V----V-----V-- Survival Plots for Anytime Search --V----V----V---- #
+# -----V----V-----V-- Plots for Extensions --V----V----V---- #
 
-raw_classical_anytime['min_plan_length'] = raw_classical_anytime.apply(lambda row: 0, axis=1)
-raw_durative_anytime['min_plan_length'] = raw_durative_anytime.apply(lambda row: 0, axis=1)
-min_solutions = []
+dictionary_extensions = open(os.path.join(parentname, 'properties_extensions'), 'r')
+data_extensions = pd.read_json(dictionary_extensions)
+raw_extensions = data_extensions.transpose()
+raw_extensions['mixture'] = raw_extensions.apply(lambda row: re.search("^p(\d)*", row.problem).group(1), axis=1)
+raw_extensions.mixture = pd.to_numeric(raw_extensions.mixture)
+print(raw_extensions)
+tier1 = raw_extensions.query('mixture < 5')
+tier2 = raw_extensions.query('mixture < 7 & mixture > 4')
+tier3 = raw_extensions.query('mixture == 7')
+print(raw_extensions)
+print(tier1)
+print(tier2)
+print(tier3)
+for index, row in tier1.iterrows():
+    times = getFirst(row['times_over_time'])
+    plan_length = row['plan_length_over_time']
+    if len(times) > len(plan_length):
+        times = times[0:len(plan_length)]
+    plt.plot(times, plan_length, label=row['problem'])
 
-dir = "/home/altava/droplet-routing/benchmarks"
-for dirpath, dirs, files in os.walk(dir):
-    print(dirpath)
-    for fl in files:
-        if re.search("^\d+.bio", fl):
-            min_plan_length = parseFile(os.path.join(dirpath, fl))
-            problemname = dirpath.split("/")[-1] + "n" + fl
-            problemname = problemname.replace("bm", "p")
-            problemname = problemname.replace("bio", "pddl")
-            raw_classical_anytime.loc[raw_classical_anytime['problem'] == problemname, ['min_plan_length']] = min_plan_length
-            raw_durative_anytime.loc[raw_durative_anytime['problem'] == problemname, ['min_plan_length']] = min_plan_length
-
-cgca = raw_classical_anytime.query('domain == "classical_grounded_coords"')
-cgsa = raw_classical_anytime.query('domain == "classical_grounded_sequential"')
-clca = raw_classical_anytime.query('domain == "classical_lifted_coords"')
-clsa = raw_classical_anytime.query('domain == "classical_lifted_sequential"')
-dgca = raw_durative_anytime.query('domain == "durative_grounded_coords"')
-dgsa = raw_durative_anytime.query('domain == "durative_grounded_sequential"')
-dlca = raw_durative_anytime.query('domain == "durative_lifted_coords"')
-dlsa = raw_durative_anytime.query('domain == "durative_lifted_sequential"')
-configurations = [cgca, cgsa, clca, clsa, dgca, dgsa, dlca, dlsa]
-for cfg in configurations:
-    scores = []
-    for index, row in cfg.iterrows():
-        i = 0
-        for t in row['times_over_time']:
-            if len(row['plan_length_over_time']) <= i:
-                i = len(row['plan_length_over_time']) - 1
-            plan_length = row['plan_length_over_time'][i]
-            if isinstance(t, list):
-                t = t[0]
-            score = compute_log_score(not math.isnan(t), plan_length, row['min_plan_length'], row['min_plan_length'] * 4)
-            scores.append((t, score))
-            i += 1
-
-    scores.sort(key=lambda x: x[0])
-    timesteps = []
-    average_score = []
-    to_average = []
-    for j in range(-25, 50):
-        timesteps.append(math.exp(j/10.0))
-        if scores:
-            while(scores[0][0] <= math.exp(j/10.0)):
-                to_average.append(scores.pop(0)[1])
-                if not scores:
-                    break
-        if len(to_average) == 0:
-            average_score.append(nan)
-        else:
-            average_score.append(sum(to_average) / len(to_average))
-
-    plt.plot(timesteps, average_score, label=cfg.iloc[0]['domain'])
 plt.legend(loc='lower left')
 plt.title("Accumulated Average Plan Length Score")
 plt.xscale('log')
+plt.yscale('log')
 plt.xlabel('time in seconds')
-plt.ylabel('plan length score')
+plt.ylabel('plan length')
 plt.show()
+
+# -----V----V-----V-- Survival Plots for Anytime Search --V----V----V---- #
+
+# raw_classical_anytime['min_plan_length'] = raw_classical_anytime.apply(lambda row: 0, axis=1)
+# raw_durative_anytime['min_plan_length'] = raw_durative_anytime.apply(lambda row: 0, axis=1)
+# min_solutions = []
+
+# dir = "/home/altava/droplet-routing/benchmarks"
+# for dirpath, dirs, files in os.walk(dir):
+#     print(dirpath)
+#     for fl in files:
+#         if re.search("^\d+.bio", fl):
+#             min_plan_length = parseFile(os.path.join(dirpath, fl))
+#             problemname = dirpath.split("/")[-1] + "n" + fl
+#             problemname = problemname.replace("bm", "p")
+#             problemname = problemname.replace("bio", "pddl")
+#             raw_classical_anytime.loc[raw_classical_anytime['problem'] == problemname, ['min_plan_length']] = min_plan_length
+#             raw_durative_anytime.loc[raw_durative_anytime['problem'] == problemname, ['min_plan_length']] = min_plan_length
+
+# cgca = raw_classical_anytime.query('domain == "classical_grounded_coords"')
+# cgsa = raw_classical_anytime.query('domain == "classical_grounded_sequential"')
+# clca = raw_classical_anytime.query('domain == "classical_lifted_coords"')
+# clsa = raw_classical_anytime.query('domain == "classical_lifted_sequential"')
+# dgca = raw_durative_anytime.query('domain == "durative_grounded_coords"')
+# dgsa = raw_durative_anytime.query('domain == "durative_grounded_sequential"')
+# dlca = raw_durative_anytime.query('domain == "durative_lifted_coords"')
+# dlsa = raw_durative_anytime.query('domain == "durative_lifted_sequential"')
+# configurations = [cgca, cgsa, clca, clsa, dgca, dgsa, dlca, dlsa]
+# for cfg in configurations:
+#     scores = []
+#     for index, row in cfg.iterrows():
+#         i = 0
+#         for t in row['times_over_time']:
+#             if len(row['plan_length_over_time']) <= i:
+#                 i = len(row['plan_length_over_time']) - 1
+#             plan_length = row['plan_length_over_time'][i]
+#             if isinstance(t, list):
+#                 t = t[0]
+#             score = compute_log_score(not math.isnan(t), plan_length, row['min_plan_length'], row['min_plan_length'] * 4)
+#             scores.append((t, score))
+#             i += 1
+
+#     scores.sort(key=lambda x: x[0])
+#     timesteps = []
+#     average_score = []
+#     to_average = []
+#     for j in range(-25, 50):
+#         timesteps.append(math.exp(j/10.0))
+#         if scores:
+#             while(scores[0][0] <= math.exp(j/10.0)):
+#                 to_average.append(scores.pop(0)[1])
+#                 if not scores:
+#                     break
+#         if len(to_average) == 0:
+#             average_score.append(nan)
+#         else:
+#             average_score.append(sum(to_average) / len(to_average))
+
+#     plt.plot(timesteps, average_score, label=cfg.iloc[0]['domain'])
+# plt.legend(loc='lower left')
+# plt.title("Accumulated Average Plan Length Score")
+# plt.xscale('log')
+# plt.xlabel('time in seconds')
+# plt.ylabel('plan length score')
+# plt.show()
             
 # -----V----V-----V-- Survival Plots --V----V----V---- #
 
