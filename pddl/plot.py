@@ -4,12 +4,14 @@ import pandas as pd
 import os
 import re
 import math
+import seaborn as sb
 
 def compute_log_score(success, value, lower_bound, upper_bound):
     """Compute score between 0 and 1.
     Best possible performance (value <= lower_bound) counts as 1, while failed
     runs (!success) and worst performance (value >= upper_bound) counts as 0.
     """
+
     if value is None or not success:
         return 0.0
     value = max(value, lower_bound)
@@ -17,6 +19,26 @@ def compute_log_score(success, value, lower_bound, upper_bound):
     raw_score = math.log(value) - math.log(upper_bound)
     best_raw_score = math.log(lower_bound) - math.log(upper_bound)
     return raw_score / best_raw_score
+
+def compute_log_scores(success, values, lower_bound, upper_bound):
+    """Compute score between 0 and 1.
+    Best possible performance (value <= lower_bound) counts as 1, while failed
+    runs (!success) and worst performance (value >= upper_bound) counts as 0.
+    """    
+    scores = []
+    for value in values:
+        if value is None or not success:
+            scores.append(0.0)
+        value = max(value, lower_bound)
+        value = min(value, upper_bound)
+        raw_score = math.log(value) - math.log(upper_bound)
+        best_raw_score = math.log(lower_bound) - math.log(upper_bound)
+        scores.append(raw_score / best_raw_score)
+    return scores
+
+def name(ext, mixture):
+    return ext + " M%i" % mixture
+    
 
 # function to parse files using the BioGram grammar
 def parseFile(file):
@@ -122,8 +144,14 @@ dictionary_extensions = open(os.path.join(parentname, 'properties_extensions'), 
 data_extensions = pd.read_json(dictionary_extensions)
 raw_extensions = data_extensions.transpose()
 raw_extensions['mixture'] = raw_extensions.apply(lambda row: re.search("^p(\d)*", row.problem).group(1), axis=1)
+raw_extensions['extension'] = raw_extensions.apply(lambda row: re.search("^p\d(\D+).pddl", row.problem).group(1), axis=1)
+bestPlan = [18, 0, 17, 13, 40, 12, 13, 40, 12, 14, 43, 7, 34, 128, 23, 32, 0, 18, 0, 0, 39]
+raw_extensions['best_plan'] = bestPlan
+print(raw_extensions)
+raw_extensions['scores_plan_length'] = raw_extensions.apply(lambda row: compute_log_scores(row.plan_length_over_time, row.plan_length_over_time, row.best_plan, 10 * row.best_plan), axis=1)
 raw_extensions.mixture = pd.to_numeric(raw_extensions.mixture)
 print(raw_extensions)
+raw_extensions = raw_extensions.sort_values('extension', kind="stable")
 tier1 = raw_extensions.query('mixture < 5')
 tier2 = raw_extensions.query('mixture < 7 & mixture > 4')
 tier3 = raw_extensions.query('mixture == 7')
@@ -131,19 +159,28 @@ print(raw_extensions)
 print(tier1)
 print(tier2)
 print(tier3)
-for index, row in tier1.iterrows():
+merge_only_colors = sb.color_palette("BuGn", 10)
+merge_mixer_colors = sb.color_palette("OrRd", 10)
+merge_no_module_colors = sb.color_palette("BuPu", 10)
+for index, row in raw_extensions.iterrows():
+    if "only" in row.problem:
+        color = merge_only_colors[row.mixture + 2]
+    if "mixer" in row.problem:
+        color = merge_mixer_colors[row.mixture + 2]
+    if "module" in row.problem:
+        color = merge_no_module_colors[row.mixture + 2]
     times = getFirst(row['times_over_time'])
-    plan_length = row['plan_length_over_time']
+    plan_length = row['scores_plan_length']
     if len(times) > len(plan_length):
         times = times[0:len(plan_length)]
-    plt.plot(times, plan_length, label=row['problem'])
+    if times:
+        plt.plot(times, plan_length, marker="o", label=name(row['extension'], row['mixture']), color=color)
 
 plt.legend(loc='lower left')
-plt.title("Accumulated Average Plan Length Score")
+plt.title("Plan length scores over time")
 plt.xscale('log')
-plt.yscale('log')
 plt.xlabel('time in seconds')
-plt.ylabel('plan length')
+plt.ylabel('plan length score')
 plt.show()
 
 # -----V----V-----V-- Survival Plots for Anytime Search --V----V----V---- #
