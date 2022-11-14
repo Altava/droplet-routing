@@ -33,7 +33,7 @@ BENCHMARKS_DIR = os.environ["ROUTING_BENCHMARKS"]
 # ALGORITHMS = ["2approx", "greedy"]
 SEED = 2018
 TIME_LIMIT = 3600
-MEMORY_LIMIT = 3500
+MEMORY_LIMIT = 6000
 CONFIGURATION = "seq-sat-lama-2011"
 DIR = Path(__file__).resolve().parent
 
