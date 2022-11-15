@@ -147,15 +147,15 @@ raw_extensions['mixture'] = raw_extensions.apply(lambda row: re.search("^p(\d)*"
 raw_extensions['extension'] = raw_extensions.apply(lambda row: re.search("^p\d(\D+).pddl", row.problem).group(1), axis=1)
 bestPlan = [18, 0, 17, 13, 40, 12, 13, 40, 12, 14, 43, 7, 34, 128, 23, 32, 0, 18, 0, 0, 39]
 raw_extensions['best_plan'] = bestPlan
-print(raw_extensions)
+# print(raw_extensions)
 raw_extensions['scores_plan_length'] = raw_extensions.apply(lambda row: compute_log_scores(row.plan_length_over_time, row.plan_length_over_time, row.best_plan, 10 * row.best_plan), axis=1)
 raw_extensions.mixture = pd.to_numeric(raw_extensions.mixture)
-print(raw_extensions)
+# print(raw_extensions)
 raw_extensions = raw_extensions.sort_values('extension', kind="stable")
 tier1 = raw_extensions.query('mixture < 5')
 tier2 = raw_extensions.query('mixture < 7 & mixture > 4')
 tier3 = raw_extensions.query('mixture == 7')
-print(raw_extensions)
+print(raw_extensions.scores_plan_length)
 print(tier1)
 print(tier2)
 print(tier3)
@@ -175,6 +175,8 @@ for index, row in raw_extensions.iterrows():
         times = times[0:len(plan_length)]
     if times:
         plt.plot(times, plan_length, marker="o", label=name(row['extension'], row['mixture']), color=color)
+    if len(row.scores_plan_length) > 0:
+        print(row.scores_plan_length[-1])
 
 plt.legend(loc='lower left')
 plt.title("Plan length scores over time")
