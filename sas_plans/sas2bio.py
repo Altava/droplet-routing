@@ -157,16 +157,16 @@ routesString = "routes\n"
 for r in routes:
     routesString += r + "\n"
             
-    # if "move" in row[0]:
-    #     current_droplet = row[5].replace(")", "")
-    #     if current_droplet == last_droplet:
-    #         routes += "(%s,%s) " % (row[3], row[4])
-    #     else:
-    #         last_droplet = current_droplet
-    #         dropletcounter += 1
-    #         fluids += "%i %s\n" % (dropletcounter, chr(ord('`') + dropletcounter))
-    #         droplets += "%i %i\n" % (dropletcounter, dropletcounter)
-    #         routes += "\n%i (%s,%s) (%s,%s) " % (dropletcounter, row[1], row[2], row[3], row[4])
+    if "move" in row[0]:
+        current_droplet = row[5].replace(")", "")
+        if current_droplet == last_droplet:
+            routes += "(%s,%s) " % (row[3], row[4])
+        else:
+            last_droplet = current_droplet
+            dropletcounter += 1
+            fluids += "%i %s\n" % (dropletcounter, chr(ord('`') + dropletcounter))
+            droplets += "%i %i\n" % (dropletcounter, dropletcounter)
+            routes += "\n%i (%s,%s) (%s,%s) " % (dropletcounter, row[1], row[2], row[3], row[4])
 
 droplets += "end\n\n"
 routesString += "\nend\n\n"

@@ -1,10 +1,12 @@
 from math import nan
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 import pandas as pd
 import os
 import re
 import math
 import seaborn as sb
+import tikzplotlib
 
 def compute_log_score(success, value, lower_bound, upper_bound):
     """Compute score between 0 and 1.
@@ -183,7 +185,7 @@ plt.title("Plan length scores over time")
 plt.xscale('log')
 plt.xlabel('time in seconds')
 plt.ylabel('plan length score')
-plt.show()
+# plt.show()
 
 # -----V----V-----V-- Survival Plots for Anytime Search --V----V----V---- #
 
@@ -211,11 +213,20 @@ plt.show()
 # dgsa = raw_durative_anytime.query('domain == "durative_grounded_sequential"')
 # dlca = raw_durative_anytime.query('domain == "durative_lifted_coords"')
 # dlsa = raw_durative_anytime.query('domain == "durative_lifted_sequential"')
+# print(cgca)
+# print(cgsa)
+# print(clca)
+# print(clsa)
+# print(dgca)
+# print(dgsa)
+# print(dlca)
+# print(dlsa)
 # configurations = [cgca, cgsa, clca, clsa, dgca, dgsa, dlca, dlsa]
 # for cfg in configurations:
-#     scores = []
+#     scores_per_instance = []
 #     for index, row in cfg.iterrows():
 #         i = 0
+#         instance = []
 #         for t in row['times_over_time']:
 #             if len(row['plan_length_over_time']) <= i:
 #                 i = len(row['plan_length_over_time']) - 1
@@ -223,38 +234,39 @@ plt.show()
 #             if isinstance(t, list):
 #                 t = t[0]
 #             score = compute_log_score(not math.isnan(t), plan_length, row['min_plan_length'], row['min_plan_length'] * 4)
-#             scores.append((t, score))
+
+#             instance.append((t, score))
 #             i += 1
+#         scores_per_instance.append(instance)
 
-#     scores.sort(key=lambda x: x[0])
+#     scores = [0] * len(scores_per_instance)
 #     timesteps = []
-#     average_score = []
-#     to_average = []
+#     summed_scores = []
 #     for j in range(-25, 50):
-#         timesteps.append(math.exp(j/10.0))
-#         if scores:
-#             while(scores[0][0] <= math.exp(j/10.0)):
-#                 to_average.append(scores.pop(0)[1])
-#                 if not scores:
-#                     break
-#         if len(to_average) == 0:
-#             average_score.append(nan)
-#         else:
-#             average_score.append(sum(to_average) / len(to_average))
+#         time = math.exp(j/10.0)
+#         timesteps.append(time)
+#         si = 0
+#         for instance in scores_per_instance:
+#             for pair in instance:
+#                 if pair[0] < time:
+#                     scores[si] = pair[1]
+#             si += 1
+#         summed_scores.append(sum(scores) / len(scores_per_instance))
 
-#     plt.plot(timesteps, average_score, label=cfg.iloc[0]['domain'])
-# plt.legend(loc='lower left')
-# plt.title("Accumulated Average Plan Length Score")
+#     plt.plot(timesteps, summed_scores, label=cfg.iloc[0]['domain'])
+
+# plt.legend(loc='upper left')
+# # plt.title("Accumulated Plan Length Score")
 # plt.xscale('log')
-# plt.xlabel('time in seconds')
-# plt.ylabel('plan length score')
+# plt.xlabel('search time in seconds')
+# plt.ylabel('accumulated plan length score')
 # plt.show()
             
 # -----V----V-----V-- Survival Plots --V----V----V---- #
 
-# problem_types = ["p15x15d7b3", "p15x15d7b6", "p9x9d5b3", "p9x9d9b3"]
-# fig, ax = plt.subplots(2, 2)
-# for i in range(0,4):
+# problem_types = ["p15x15d7b3"] # , "p15x15d7b6", "p9x9d5b3", "p9x9d9b3"
+# fig, ax = plt.subplots(1, 1)
+# for i in range(0,len(problem_types)):
 #     p15_c = raw_classical.query('problem_type == "%s"' % problem_types[i])
 #     p15_d = raw_durative.query('problem_type == "%s"' % problem_types[i])
 #     p15_cgc = p15_c.query('domain == "classical_grounded_coords"')
@@ -286,45 +298,37 @@ plt.show()
 #         dls.append((len(p15_dls[p15_dls['search_time'] < math.exp(j/10.0)]))/len(p15_dls))
 
 
-#     ax[int(i/2), i%2].plot(timesteps, cgc, label='classical grounded coordinates')
-#     ax[int(i/2), i%2].plot(timesteps, cgs, label='classical grounded sequential')
-#     ax[int(i/2), i%2].plot(timesteps, clc, label='classical lifted coordinates')
-#     ax[int(i/2), i%2].plot(timesteps, cls, label='classical lifted sequential')
-#     ax[int(i/2), i%2].plot(timesteps, dgc, label='durative grounded coordinates')
-#     ax[int(i/2), i%2].plot(timesteps, dgs, label='durative grounded sequential')
-#     ax[int(i/2), i%2].plot(timesteps, dlc, label='durative lifted coordinates')
-#     ax[int(i/2), i%2].plot(timesteps, dls, label='durative lifted sequential')
-#     ax[int(i/2), i%2].set_title(problem_types[i])
+#     ax.plot(timesteps, cgc, label='classical grounded coordinates')
+#     ax.plot(timesteps, cgs, label='classical grounded sequential')
+#     ax.plot(timesteps, clc, label='classical lifted coordinates')
+#     ax.plot(timesteps, cls, label='classical lifted sequential')
+#     ax.plot(timesteps, dgc, label='durative grounded coordinates')
+#     ax.plot(timesteps, dgs, label='durative grounded sequential')
+#     ax.plot(timesteps, dlc, label='durative lifted coordinates')
+#     ax.plot(timesteps, dls, label='durative lifted sequential')
+#     ax.set_title(problem_types[i])
 #     # ax[int(i/2), i%2].xscale('log')
-# for a in ax.flat:
-#     a.set_xscale('log')
-#     a.set(xlabel='time in seconds')
-#     a.set(ylabel='percentage of instances that found a solution')
-#     a.label_outer()
-# ax[1, 0].legend(loc='lower right')
+#     ax.set_xscale('log')
+#     ax.set(xlabel='time in seconds')
+#     ax.set(ylabel='percentage of instances that found a solution')
+#     ax.label_outer()
+# ax.legend(loc='lower right')
 # plt.show()
 
 # ----V----V----V-- Basic Blots --V----V----V---- #
 
-# clc = data.filter(regex='^lama-first-classical_lifted_coords', axis=1)
-# # print(clc)
-
-# print(cgc['droplets'])
-
-# xAxis = [cgc['evaluations']]
-# yAxis = [cgc['search_time']]
-# plt.grid(True)
-
 # plot_classical = True
-# plot_durative = False
-# plots = [["droplets", "score_search_time", drop], ["size_x", "score_search_time", size], ["blockages", "score_search_time", bloc], 
-#         ["droplets", "plan_length", drop], ["size_x", "plan_length", size], ["blockages", "plan_length", bloc], 
-#         ["droplets", "search_score_per_plan_length", drop], ["size_x", "search_score_per_plan_length", size], ["blockages", "search_score_per_plan_length", bloc]]
+# plot_durative = True
+# plots = [["droplets", "score_search_time", drop], ["size_x", "score_search_time", size], ["blockages", "score_search_time", bloc]]
+# # plots = [["droplets", "score_search_time", drop], ["size_x", "score_search_time", size], ["blockages", "score_search_time", bloc], 
+# #         ["droplets", "plan_length", drop], ["size_x", "plan_length", size], ["blockages", "plan_length", bloc], 
+# #         ["droplets", "search_score_per_plan_length", drop], ["size_x", "search_score_per_plan_length", size], ["blockages", "search_score_per_plan_length", bloc]]
 # fig, axes = plt.subplots(int(len(plots) / 3), 3)
 # i_p = 0
 
 # for p in plots:
-#     ax = axes[int(i_p / 3), i_p % 3]
+#     ax = axes[int(i_p % 3)]
+#     # ax = axes[int(i_p / 3), i_p % 3]
 #     if plot_classical:
 #         p[2][0].query('domain == "classical_lifted_coords"').plot(x=p[0], y=p[1], label="Classical Lifted Coords", ax=ax, legend=0)
 #         p[2][0].query('domain == "classical_lifted_sequential"').plot(x=p[0], y=p[1], label="Classical Lifted Sequential", ax=ax, legend=0)
@@ -337,7 +341,7 @@ plt.show()
 #         p[2][1].query('domain == "durative_grounded_sequential"').plot(x=p[0], y=p[1], label="Durative Grounded Sequential", ax=ax, legend=0)
 #     ax.set_xlabel(p[0])
 #     ax.set_ylabel(p[1])
-#     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 #     handles, labels = ax.get_legend_handles_labels()
 #     fig.subplots_adjust(bottom=0.17)
 #     fig.legend(handles, labels, loc='lower right')
@@ -355,9 +359,8 @@ plt.show()
 # ax_s.set_xlabel("size of the chip")
 # ax_s.set_ylabel("mean search time score")
 
-
 # ax_scatter = agg_classical.query('domain == "classical_lifted_sequential"').plot.scatter(x="droplets", y="size_x")
 
-# plt.plot(xAxis,yAxis, color='maroon', marker='o')
+tikzplotlib.save("test.tex")
 
-# plt.show()
+plt.show()
